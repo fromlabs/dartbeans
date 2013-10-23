@@ -49,3 +49,7 @@ You're welcome! Just visit the [GitHub page][site] and open a new issue or mail 
 
 [changelog]:CHANGELOG
 [site]:https://github.com/fromlabs/dartbeans
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/fromlabs/dartbeans/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
