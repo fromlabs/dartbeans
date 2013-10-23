@@ -45,5 +45,5 @@ Any comment?
 
 You're welcome! Just visit the [GitHub page][site] and open a new issue or mail me.
 
-[changelog]:CHANGELOG
+[changelog]:https://raw.github.com/fromlabs/dartbeans/master/CHANGELOG
 [site]:https://github.com/fromlabs/dartbeans
