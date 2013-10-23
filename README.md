@@ -21,6 +21,6 @@ Any comment?
 -------------
 You're welcome! Just visit the [Google Code page][gcp] and open a new issue or mail me.
 
-[changelog]:
+[changelog]:CHANGELOG
 [gcp]:
 [dartdoc]:
