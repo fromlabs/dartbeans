@@ -19,8 +19,7 @@ Limits
 
 Any comment?
 -------------
-You're welcome! Just visit the [Google Code page][gcp] and open a new issue or mail me.
+You're welcome! Just visit the [GitHub page][site] and open a new issue or mail me.
 
 [changelog]:CHANGELOG
-[gcp]:
-[dartdoc]:
+[site]:https://github.com/fromlabs/dartbeans
