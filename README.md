@@ -9,7 +9,7 @@ To know something more about the released version have a look at the
 Getting started
 ---------------
 
-**1.** Add the folowing to your pubspec.yaml and run pub install:
+**1.** Add the following dependency to your pubspec.yaml and run pub get:
 ```yaml
 dependencies:
 	dartbeans: any
