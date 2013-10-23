@@ -46,7 +46,7 @@ class ProxyDartBean extends DartBean
   FLEventTarget get target => _target;
 }
 
-abstract class DartBean extends BaseTarget {
+class DartBean extends BaseTarget {
   final Map<String, dynamic> _propertyValues = {};
 
   ToDiscriminateEventStreamProvider get _propertyChangedProvider =>
