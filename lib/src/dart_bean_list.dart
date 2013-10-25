@@ -55,7 +55,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E> implements EventTarge
     		onPreDispatching(event);
     }
 
-		_delegate.notifyPropertyChanged(index, event);
+		_delegate.dispatchPropertyChanged(index, event);
 
     if (onPostDispatched != null) {
 			onPostDispatched(event);
@@ -86,7 +86,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E> implements EventTarge
   				onPreDispatching(event);
 	    }
 
-			_delegate.notifyPropertyChanged(index, event);
+			_delegate.dispatchPropertyChanged(index, event);
 
 	    if (onPostDispatched != null) {
 				onPostDispatched(event);
@@ -116,7 +116,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E> implements EventTarge
 	    		onPreDispatching(event);
 	    }
 
-			_delegate.notifyPropertyChanged(index, event);
+			_delegate.dispatchPropertyChanged(index, event);
 
 	    if (onPostDispatched != null) {
 				onPostDispatched(event);

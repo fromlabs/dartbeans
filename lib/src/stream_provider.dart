@@ -141,24 +141,24 @@ abstract class StreamProvider<T extends FLEvent> {
     return this;
   }
 
-  void addBubbleProvider(dynamic bubblingId, StreamProvider<T> bubbleProvider) {
+  void addBubbleTargetProvider(dynamic bubblingId, StreamProvider<T> bubbleProvider) {
     var reference = new BubbleProviderReference(bubblingId, bubbleProvider);
 		if (_hostProvider != null) {
-      throw new UnsupportedError("Adding bubble provider to hosted" +
+      throw new UnsupportedError("Adding bubble target provider to hosted" +
           " provider not allowed");
     } else if (_bubbleProviders == null) {
 	    _bubbleProviders = [reference];
 		} else if (!_bubbleProviders.contains(reference)) {
 				_bubbleProviders.add(reference);
 		} else {
-			throw new StateError("Bubble provider was already added");
+			throw new StateError("Bubble target provider was already added");
 		}
   }
 
-  void removeBubbleProvider(dynamic bubblingId, StreamProvider<T> bubbleProvider) {
+  void removeBubbleTargetProvider(dynamic bubblingId, StreamProvider<T> bubbleProvider) {
 		var reference = new BubbleProviderReference(bubblingId, bubbleProvider);
 		if (_hostProvider != null) {
-      throw new UnsupportedError("Removing bubble provider from hosted" +
+      throw new UnsupportedError("Removing bubble target provider from hosted" +
           " provider not allowed");
     } else if (_bubbleProviders != null && _bubbleProviders.contains(reference)) {
 			_bubbleProviders.remove(reference);
@@ -166,7 +166,7 @@ abstract class StreamProvider<T extends FLEvent> {
 				_bubbleProviders = null;
 			}
     } else {
-      throw new StateError("Bubble provider to remove is not present");
+      throw new StateError("Bubble target provider to remove is not present");
     }
   }
 
@@ -178,31 +178,19 @@ abstract class StreamProvider<T extends FLEvent> {
 
   Stream<T> get stream => bubbleStream.where((event) => !event.bubbled);
 
-  void _notifyInternal(T event) {
-    if (target != null) {
-      if (event == null) {
-        event = new FLEvent();
-      }
-
-      _complete(event);
-
-      _notifyEvent(event, this);
-    }
-  }
-
-  void _notifyEvent(FLEvent event, StreamProvider<T> _targetProvider) {
+  void _dispatchEvent(FLEvent event, StreamProvider<T> _targetProvider) {
     _controller.add(event);
 
-    // notify to host provider if defined
+    // dispatch to host provider if defined
     if (_hostProvider != null) {
-      _hostProvider._notifyEvent(event, _targetProvider);
+      _hostProvider._dispatchEvent(event, _targetProvider);
     } else {
       // TODO check if bubbling is enabled here!
-      _notifyBubbleEvent(event, _targetProvider);
+      _dispatchBubbleEvent(event, _targetProvider);
     }
   }
 
-  void _notifyBubbleEvent(FLEvent event,
+  void _dispatchBubbleEvent(FLEvent event,
       StreamProvider<T> _targetProvider) {
     if (_bubbleProviders != null) {
       _bubbleProviders.forEach((BubbleProviderReference reference) {
@@ -222,7 +210,7 @@ abstract class StreamProvider<T extends FLEvent> {
 
 					clonedEvent._bubbleReferences.add(targetReference);
 
-	        (targetBubbleProvider as FLEventStreamProvider).notify(clonedEvent);
+	        (targetBubbleProvider as FLEventStreamProvider).dispatch(clonedEvent);
 				}
       });
     }
@@ -311,8 +299,12 @@ class FLEventStreamProvider<T extends FLEvent>
     }
   }
 
-  void notify([T event]) {
-    _notifyInternal(event);
+  void dispatch(T event) {
+		if (target != null) {
+			_complete(event);
+
+			_dispatchEvent(event, this);
+		}
   }
 
   StreamProvider _getBubbleProvider(StreamProvider provider) {
@@ -371,8 +363,8 @@ class ToDiscriminateEventStreamProvider<T extends DiscriminatedEvent>
           new DiscriminatedEventStreamProvider
             ._forHostProvider(_eventType, discriminator, this));
 
-  void notify([T event]) {
-    throw new UnsupportedError("Notify event to " +
+  void dispatch(T event) {
+    throw new UnsupportedError("Dispatch event from " +
       "host provider not allowed");
   }
 }

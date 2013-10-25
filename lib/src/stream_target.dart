@@ -40,11 +40,6 @@ abstract class BaseTarget implements BubblingTarget {
   final ToRouteEventStreamProvider _eventProvider =
       new ToRouteEventStreamProvider();
 
-  Stream<FLEvent> get onEventDispatched => _eventProvider.stream;
-
-  Stream<FLEvent> get onBubbleEventDispatched =>
-      _eventProvider.bubbleStream;
-
   ToRouteStreams get onEvents => _eventProvider.onEvents;
 
   ToRouteStreams get onBubbleEvents => _eventProvider.onBubbleEvents;
@@ -55,19 +50,36 @@ abstract class BaseTarget implements BubblingTarget {
   ToDiscriminateStreams get onBubbleToDiscriminateEvents =>
       _eventProvider.onBubbleToDiscriminateEvents;
 
+  Stream<FLEvent> get onEventDispatched => _eventProvider.stream;
+
+  Stream<FLEvent> get onBubbleEventDispatched =>
+      _eventProvider.bubbleStream;
+
   BaseTarget() {
     _eventProvider.target = this;
   }
 
   FLEventTarget get target => this;
 
-  void notifyEvent(String eventType, [FLEvent event]) {
-    _eventProvider[eventType].notify(event);
+  void dispatch(String eventType, [FLEvent event]) {
+		if (event == null) {
+			event = new FLEvent();
+		}
+
+    _eventProvider[eventType].dispatch(event);
+  }
+
+  void discriminatedDispatch(String eventType, dynamic discriminator, DiscriminatedEvent event) {
+		if (event == null) {
+			event = new DiscriminatedEvent();
+		}
+
+    (_eventProvider[eventType] as ToDiscriminateEventStreamProvider)[discriminator].dispatch(event);
   }
 
   void addBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget) {
 		if (bubbleTarget is BaseTarget) {
-			_eventProvider.addBubbleProvider(bubblingId, (bubbleTarget as BaseTarget)._eventProvider);
+			_eventProvider.addBubbleTargetProvider(bubblingId, (bubbleTarget as BaseTarget)._eventProvider);
 		} else if (bubbleTarget is EventTargetDelegator) {
 			addBubbleTarget(bubblingId, (bubbleTarget as EventTargetDelegator).delegate);
 		} else {
@@ -77,7 +89,7 @@ abstract class BaseTarget implements BubblingTarget {
 
   void removeBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget) {
 		if (bubbleTarget is BaseTarget) {
-			_eventProvider.removeBubbleProvider(bubblingId, (bubbleTarget as BaseTarget)._eventProvider);
+			_eventProvider.removeBubbleTargetProvider(bubblingId, (bubbleTarget as BaseTarget)._eventProvider);
 		} else if (bubbleTarget is EventTargetDelegator) {
 			removeBubbleTarget(bubblingId, (bubbleTarget as EventTargetDelegator).delegate);
 		} else {

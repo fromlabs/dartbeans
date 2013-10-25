@@ -11,12 +11,13 @@ typedef PropertyCalculation();
 
 class ListenerBinder {
   List<StreamSubscription> _subscriptions = [];
+
   var _onData;
 
   ListenerBinder(this._onData);
 
   void listen(Stream stream) {
-    var subscription = stream.listen(_notifyToListener);
+    var subscription = stream.listen(_onData);
     _subscriptions.add(subscription);
   }
 
@@ -38,10 +39,6 @@ class ListenerBinder {
         subscription.cancel());
     this._subscriptions.clear();
   }
-
-  void _notifyToListener(var event) {
-    _onData(event);
-  }
 }
 
 class ActionBinder extends ListenerBinder {
@@ -57,6 +54,6 @@ class ActionBinder extends ListenerBinder {
   }
 
   void runNow() {
-    _notifyToListener(null);
+		_onData(null);
   }
 }

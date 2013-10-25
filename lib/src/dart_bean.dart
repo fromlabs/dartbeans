@@ -49,22 +49,19 @@ class ProxyDartBean extends DartBean
 class DartBean extends BaseTarget {
   final Map<String, dynamic> _propertyValues = {};
 
-  ToDiscriminateEventStreamProvider get _propertyChangedProvider =>
-  			_eventProvider[PropertyChangedEvent.EVENT_TYPE];
-
-  Stream<PropertyChangedEvent> get onPropertyChanged =>
-      _propertyChangedProvider.stream;
-
-  Stream<PropertyChangedEvent> get onBubblePropertyChanged =>
-      _propertyChangedProvider.bubbleStream;
-
   DiscriminatorStreams<PropertyChangedEvent> get
     onPropertyChangedEvents =>
-      _propertyChangedProvider.onDiscriminatorEvents;
+			onToDiscriminateEvents[PropertyChangedEvent.EVENT_TYPE];
 
   DiscriminatorStreams<PropertyChangedEvent> get
     onBubblePropertyChangedEvents =>
-        _propertyChangedProvider.onBubbleDiscriminatorEvents;
+			onBubbleToDiscriminateEvents[PropertyChangedEvent.EVENT_TYPE];
+
+	Stream<PropertyChangedEvent> get onPropertyChanged =>
+		onPropertyChangedEvents.stream;
+
+  Stream<PropertyChangedEvent> get onBubblePropertyChanged =>
+		onBubblePropertyChangedEvents.stream;
 
   operator [](String property) => getPropertyValue(property);
 
@@ -99,7 +96,7 @@ class DartBean extends BaseTarget {
         onPreDispatching(event);
       }
 
-      notifyPropertyChanged(property, event);
+      dispatchPropertyChanged(property, event);
 
       if (onPostDispatched != null) {
         onPostDispatched(event);
@@ -111,9 +108,9 @@ class DartBean extends BaseTarget {
     }
   }
 
-  void notifyPropertyChanged(dynamic property,
+  void dispatchPropertyChanged(dynamic property,
       PropertyChangedEvent event) {
-    _propertyChangedProvider[property].notify(event);
+    discriminatedDispatch(PropertyChangedEvent.EVENT_TYPE, property, event);
   }
 
   PropertyCalculationBinder bindCalculatedProperty(String targetProperty, PropertyCalculation calculate) =>

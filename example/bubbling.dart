@@ -36,7 +36,7 @@ class Person extends DartBean {
   }
 
 	void refresh() {
-		notifyEvent(REFRESHED_EVENT_TYPE, new FLEvent());
+		dispatch(REFRESHED_EVENT_TYPE);
 	}
 
   String toString() => "[Person: $name ${mother != null ? "with mother $mother" : "without mother"}]";

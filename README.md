@@ -31,11 +31,22 @@ void main() {
 	person["name"] = "Hans";
 }
 ```
+Beans
+-----
+
+Discriminated events
+--------------------
+
+Event bubbling
+--------------
+
+Listener binders
+----------------
 
 Examples
 --------
 
-Examples that show the use of DartBeans are in the example folder.
+Examples that show the use of DartBeans are in the [example] folder.
 
 Running Tests
 -------------
@@ -48,4 +59,5 @@ Any comment?
 You're welcome! Just visit the [GitHub page][site] and open a new issue or mail me.
 
 [changelog]:https://raw.github.com/fromlabs/dartbeans/master/CHANGELOG
+[example]:https://github.com/fromlabs/dartbeans/tree/master/example
 [site]:https://github.com/fromlabs/dartbeans

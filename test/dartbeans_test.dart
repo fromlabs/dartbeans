@@ -44,15 +44,15 @@ void main() {
       FLEventStreamProvider provider = new FLEventStreamProvider(RENDERED_EVENT_TYPE, target);
       FLEventStreamProvider bubbleProvider = new FLEventStreamProvider(RENDERED_EVENT_TYPE, bubbleTarget);
 
-      provider.addBubbleProvider("provider", bubbleProvider);
-      expect(() => provider.addBubbleProvider("provider", bubbleProvider), throwsStateError);
+      provider.addBubbleTargetProvider("provider", bubbleProvider);
+      expect(() => provider.addBubbleTargetProvider("provider", bubbleProvider), throwsStateError);
     });
 
     test('Bubble provider to remove not present', () {
       FLEventStreamProvider provider = new FLEventStreamProvider(RENDERED_EVENT_TYPE, target);
       FLEventStreamProvider bubbleProvider = new FLEventStreamProvider(RENDERED_EVENT_TYPE, bubbleTarget);
 
-      expect(() { provider.removeBubbleProvider("provider", bubbleProvider); }, throwsStateError);
+      expect(() { provider.removeBubbleTargetProvider("provider", bubbleProvider); }, throwsStateError);
     });
   });
 
@@ -71,8 +71,8 @@ void main() {
       provider.stream.listen(expectAsync1((event) =>
         expect(event.type, equals(RENDERED_EVENT_TYPE)), count:2));
 
-      provider.notify();
-      provider.notify();
+      provider.dispatch(new FLEvent());
+      provider.dispatch(new FLEvent());
     });
   });
 
@@ -93,18 +93,18 @@ void main() {
       bubbleProvider.bubbleStream.listen(expectAsync1((event) =>
           expect(event.type, equals(RENDERED_EVENT_TYPE)), count:4));
 
-      provider.notify();
-      bubbleProvider.notify();
+      provider.dispatch(new FLEvent());
+      bubbleProvider.dispatch(new FLEvent());
 
-      provider.addBubbleProvider("provider", bubbleProvider);
+      provider.addBubbleTargetProvider("provider", bubbleProvider);
 
-      provider.notify();
-      bubbleProvider.notify();
+      provider.dispatch(new FLEvent());
+      bubbleProvider.dispatch(new FLEvent());
 
-      provider.removeBubbleProvider("provider", bubbleProvider);
+      provider.removeBubbleTargetProvider("provider", bubbleProvider);
 
-      provider.notify();
-      bubbleProvider.notify();
+      provider.dispatch(new FLEvent());
+      bubbleProvider.dispatch(new FLEvent());
     });
   });
 
@@ -136,8 +136,8 @@ void main() {
       addressUpdatedProvider.stream.listen(expectAsync1((event) =>
           expect(false, 'Should not be reached'), count:0));
 
-      nameUpdatedProvider.notify(new DiscriminatedEvent());
-      nameUpdatedProvider.notify(new DiscriminatedEvent());
+      nameUpdatedProvider.dispatch(new DiscriminatedEvent());
+      nameUpdatedProvider.dispatch(new DiscriminatedEvent());
     });
   });
 
@@ -150,9 +150,9 @@ void main() {
       ToDiscriminateEventStreamProvider updatedProvider = new ToDiscriminateEventStreamProvider(UPDATED_EVENT_TYPE);
       expect(() => updatedProvider[NAME_DISCRIMINATOR].target = target, throwsUnsupportedError);
     });
-    test('Notify on host provider', () {
+    test('Dispatch from host provider', () {
       ToDiscriminateEventStreamProvider updatedProvider = new ToDiscriminateEventStreamProvider(UPDATED_EVENT_TYPE, target);
-      expect(() => updatedProvider.notify(new DiscriminatedEvent()), throwsUnsupportedError);
+      expect(() => updatedProvider.dispatch(new DiscriminatedEvent()), throwsUnsupportedError);
     });
     test('Event type with discriminator postfix', () {
       expect(() => new ToDiscriminateEventStreamProvider(RENDERED_EVENT_TYPE), throwsArgumentError);
@@ -167,14 +167,14 @@ void main() {
       ToDiscriminateEventStreamProvider updatedProvider = new ToDiscriminateEventStreamProvider(UPDATED_EVENT_TYPE);
       ToDiscriminateEventStreamProvider bubbleUpdatedProvider = new ToDiscriminateEventStreamProvider(UPDATED_EVENT_TYPE);
 
-      expect(() => updatedProvider[NAME_DISCRIMINATOR].addBubbleProvider("provider", bubbleUpdatedProvider), throwsUnsupportedError);
+      expect(() => updatedProvider[NAME_DISCRIMINATOR].addBubbleTargetProvider("provider", bubbleUpdatedProvider), throwsUnsupportedError);
     });
 
     test('Remove bubble provider from hosted provider', () {
       ToDiscriminateEventStreamProvider updatedProvider = new ToDiscriminateEventStreamProvider(UPDATED_EVENT_TYPE);
       ToDiscriminateEventStreamProvider bubbleUpdatedProvider = new ToDiscriminateEventStreamProvider(UPDATED_EVENT_TYPE);
 
-      expect(() => updatedProvider[NAME_DISCRIMINATOR].removeBubbleProvider("provider", bubbleUpdatedProvider), throwsUnsupportedError);
+      expect(() => updatedProvider[NAME_DISCRIMINATOR].removeBubbleTargetProvider("provider", bubbleUpdatedProvider), throwsUnsupportedError);
     });
   });
 
@@ -195,8 +195,8 @@ void main() {
       updatedProvider.stream.listen(expectAsync1((event) =>
           expect(event.type, equals(UPDATED_EVENT_TYPE)), count:2));
 
-      updatedProvider[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      updatedProvider[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
+      updatedProvider[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      updatedProvider[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
     });
   });
 
@@ -241,24 +241,24 @@ void main() {
       bubbleUpdatedProvider.bubbleStream.listen(expectAsync1((event) =>
           expect(event.type, equals(UPDATED_EVENT_TYPE)), count:8));
 
-      updatedProvider[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      updatedProvider[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      bubbleUpdatedProvider[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      bubbleUpdatedProvider[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
+      updatedProvider[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      updatedProvider[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      bubbleUpdatedProvider[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      bubbleUpdatedProvider[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
 
-      updatedProvider.addBubbleProvider("provider", bubbleUpdatedProvider);
+      updatedProvider.addBubbleTargetProvider("provider", bubbleUpdatedProvider);
 
-      updatedProvider[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      updatedProvider[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      bubbleUpdatedProvider[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      bubbleUpdatedProvider[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
+      updatedProvider[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      updatedProvider[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      bubbleUpdatedProvider[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      bubbleUpdatedProvider[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
 
-      updatedProvider.removeBubbleProvider("provider", bubbleUpdatedProvider);
+      updatedProvider.removeBubbleTargetProvider("provider", bubbleUpdatedProvider);
 
-      updatedProvider[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      updatedProvider[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      bubbleUpdatedProvider[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      bubbleUpdatedProvider[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
+      updatedProvider[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      updatedProvider[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      bubbleUpdatedProvider[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      bubbleUpdatedProvider[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
     });
   });
 
@@ -274,9 +274,9 @@ void main() {
       expect(() => (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].target = target, throwsUnsupportedError);
       expect(() => (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].target = target, throwsUnsupportedError);
     });
-    test('Notify on host provider', () {
+    test('Dispatch from host provider', () {
       ToRouteEventStreamProvider provider = new ToRouteEventStreamProvider(target);
-      expect(() => provider[UPDATED_EVENT_TYPE].notify(new DiscriminatedEvent()), throwsUnsupportedError);
+      expect(() => provider[UPDATED_EVENT_TYPE].dispatch(new DiscriminatedEvent()), throwsUnsupportedError);
     });
   });
 
@@ -299,9 +299,9 @@ void main() {
       provider.onEvents[UPDATED_EVENT_TYPE].listen(expectAsync1((event) =>
           expect(event.type, equals(UPDATED_EVENT_TYPE)), count:2));
 
-      provider[RENDERED_EVENT_TYPE].notify();
-      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
+      provider[RENDERED_EVENT_TYPE].dispatch(new FLEvent());
+      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
     });
   });
 
@@ -354,30 +354,30 @@ void main() {
       bubbledProvider.onBubbleEvents[UPDATED_EVENT_TYPE].listen(expectAsync1((event) =>
           expect(event.type, equals(UPDATED_EVENT_TYPE)), count:8));
 
-      provider[RENDERED_EVENT_TYPE].notify();
-      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      bubbledProvider[RENDERED_EVENT_TYPE].notify();
-      (bubbledProvider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      (bubbledProvider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
+      provider[RENDERED_EVENT_TYPE].dispatch(new FLEvent());
+      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      bubbledProvider[RENDERED_EVENT_TYPE].dispatch(new FLEvent());
+      (bubbledProvider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      (bubbledProvider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
 
-      provider.addBubbleProvider("provider", bubbledProvider);
+      provider.addBubbleTargetProvider("provider", bubbledProvider);
 
-      provider[RENDERED_EVENT_TYPE].notify();
-      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      bubbledProvider[RENDERED_EVENT_TYPE].notify();
-      (bubbledProvider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      (bubbledProvider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
+      provider[RENDERED_EVENT_TYPE].dispatch(new FLEvent());
+      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      bubbledProvider[RENDERED_EVENT_TYPE].dispatch(new FLEvent());
+      (bubbledProvider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      (bubbledProvider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
 
-      provider.removeBubbleProvider("provider", bubbledProvider);
+      provider.removeBubbleTargetProvider("provider", bubbledProvider);
 
-      provider[RENDERED_EVENT_TYPE].notify();
-      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      bubbledProvider[RENDERED_EVENT_TYPE].notify();
-      (bubbledProvider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      (bubbledProvider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
+      provider[RENDERED_EVENT_TYPE].dispatch(new FLEvent());
+      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      bubbledProvider[RENDERED_EVENT_TYPE].dispatch(new FLEvent());
+      (bubbledProvider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      (bubbledProvider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
     });
   });
 
@@ -402,9 +402,9 @@ void main() {
         ..listens([provider.onToDiscriminateEvents[UPDATED_EVENT_TYPE][ADDRESS_DISCRIMINATOR],
                    provider.onEvents[UPDATED_EVENT_TYPE]]);
 
-      provider[RENDERED_EVENT_TYPE].notify();
-      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].notify(new DiscriminatedEvent());
-      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].notify(new DiscriminatedEvent());
+      provider[RENDERED_EVENT_TYPE].dispatch(new FLEvent());
+      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[NAME_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
+      (provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
     });
   });
 }
