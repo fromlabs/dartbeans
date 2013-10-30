@@ -1,15 +1,24 @@
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/fromlabs/dartbeans/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
 DartBeans
-=========
+===
 
 DartBeans is a Dart library that helps working with event streams.
 
 To know something more about the released version have a look at the
 [CHANGELOG][changelog].
 
-Getting started
----------------
+* [Getting started](#getting_started)
+* [Beans](#beans)
+* [Binders](#binders)
+* [Bean chainings](#bean_chainings)
+* [Under the covers](#under_covers)
+* [Examples](#examples)
+* [Running Tests](#tests)
+* [Any Comments?](#comments)
+
+[Getting started](id:getting_started)
+---
 
 **1.** Add the following dependency to your `pubspec.yaml` and run `pub get`:
 
@@ -29,14 +38,14 @@ void main() {
 
 	person.onPropertyChangedEvents["name"]
 		.listen((PropertyChangedEvent event) =>
-			print("Property changed: ${event.property} = ${event.newValue}"));
+			print("Changed: ${event.property} = ${event.newValue}"));
 
 	person["name"] = "Hans";
 }
 ```
 
-Beans
------
+[Beans](id:beans)
+---
 
 The common way to use DartBeans is by extending the `DartBean` class and by adding extra code for accessing properties:
 
@@ -62,8 +71,10 @@ class Person extends DartBean {
 Property changed event streams are exposed by the `onPropertyChangedEvents` getter on the `DartBean` class and can be accessed in a convenient way:
 
 ```dart
-	Stream<PropertyChangedEvent> get onNameChanged => onPropertyChangedEvents[NAME];
-	Stream<PropertyChangedEvent> get onAgeChanged => onPropertyChangedEvents[AGE];
+	Stream<PropertyChangedEvent> get onNameChanged => 
+		onPropertyChangedEvents[NAME];
+	Stream<PropertyChangedEvent> get onAgeChanged => 
+		onPropertyChangedEvents[AGE];
 ```
 
 Custom events can be easily implemented:
@@ -85,12 +96,14 @@ void main() {
 
 	// listen to changes on name property
 	person.onNameChanged.listen((PropertyChangedEvent event) {
-		print("1. Property change ${event.property} = ${event.newValue} on ${event.target}");
+		print("1. Property change ${event.property} = ${event.newValue}"
+			+ " on ${event.target}");
 	});
 
 	// listen to changes on age property
 	person.onAgeChanged.listen((PropertyChangedEvent event) {
-		print("2. Property change ${event.property} = ${event.newValue} on ${event.target}");
+		print("2. Property change ${event.property} = ${event.newValue}"
+			+ " on ${event.target}");
 	});
 
 	// listen to refreshes
@@ -104,18 +117,18 @@ void main() {
 }
 ```
 
-Binders
--------
+[Binders](id:binders)
+---
 
 TODOC
 
-Bean chains
------------
+[Bean chainings](id:bean_chainings)
+---
 
 TODOC
 
-Under the covers
-----------------
+[Under the covers](id:under_covers)
+---
 
 TODOC
 
@@ -131,17 +144,17 @@ TODOC
 
 TODOC
 
-Examples
---------
+[Examples](id:examples)
+---
 
 Examples that show the use of DartBeans are in the [example] folder.
 
-Running Tests
--------------
+[Running Tests](id:tests)
+---
 To run the tests just run the test/dartbeans_test.dart file.
 
-Any comment?
-------------
+[Any Comments?](id:comments)
+---
 You're welcome! Just visit the [GitHub page][site] and open a new issue or mail me.
 
 

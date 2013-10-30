@@ -10,7 +10,7 @@ void main() {
 
 	person.onPropertyChangedEvents["name"]
 		.listen((PropertyChangedEvent event) =>
-			print("Property changed: ${event.property} = ${event.newValue}"));
+			print("Changed: ${event.property} = ${event.newValue}"));
 
 	person["name"] = "Hans";
 }

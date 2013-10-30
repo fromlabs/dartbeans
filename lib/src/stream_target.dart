@@ -79,9 +79,9 @@ abstract class BaseTarget implements BubblingTarget {
 
   void addBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget) {
 		if (bubbleTarget is BaseTarget) {
-			_eventProvider.addBubbleTargetProvider(bubblingId, (bubbleTarget as BaseTarget)._eventProvider);
+			_eventProvider.addBubbleTargetProvider(bubblingId, bubbleTarget._eventProvider);
 		} else if (bubbleTarget is EventTargetDelegator) {
-			addBubbleTarget(bubblingId, (bubbleTarget as EventTargetDelegator).delegate);
+			addBubbleTarget(bubblingId, bubbleTarget.delegate);
 		} else {
 			throw new ArgumentError("Event target ${bubbleTarget.runtimeType} not supported for bubbling!");
 		}
@@ -89,9 +89,9 @@ abstract class BaseTarget implements BubblingTarget {
 
   void removeBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget) {
 		if (bubbleTarget is BaseTarget) {
-			_eventProvider.removeBubbleTargetProvider(bubblingId, (bubbleTarget as BaseTarget)._eventProvider);
+			_eventProvider.removeBubbleTargetProvider(bubblingId, bubbleTarget._eventProvider);
 		} else if (bubbleTarget is EventTargetDelegator) {
-			removeBubbleTarget(bubblingId, (bubbleTarget as EventTargetDelegator).delegate);
+			removeBubbleTarget(bubblingId, bubbleTarget.delegate);
 		} else {
 			throw new ArgumentError("Event target ${bubbleTarget.runtimeType} not supported for bubbling!");
 		}

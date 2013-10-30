@@ -15,7 +15,8 @@ class Person extends DartBean {
 	static const REFRESHED_EVENT_TYPE = "refreshed";
 
 	Stream<FLEvent> get onRefreshed => onEvents[REFRESHED_EVENT_TYPE];
-  Stream<PropertyChangedEvent> get onNameChanged => onPropertyChangedEvents[NAME];
+  Stream<PropertyChangedEvent> get onNameChanged =>
+		onPropertyChangedEvents[NAME];
 
 	Person();
 
@@ -36,7 +37,8 @@ void main() {
   Person person = new Person();
 
 	person.onNameChanged.listen((PropertyChangedEvent event) {
-		print("Property change ${event.property} = ${event.newValue} on ${event.target}");
+		print("Property change ${event.property} = ${event.newValue}"
+			+ " on ${event.target}");
 	});
 
 	person.onRefreshed.listen((event) {
