@@ -15,7 +15,7 @@ void main() {
 
   account["name"] = "Account1";
 
-  account.activateDispatching();
+  account.activeBubbleTargeting();
 
   account["name"] = "Account2";
 
@@ -29,15 +29,15 @@ void main() {
 
   account["name"] = "Account5";
 
-  operation.activateDispatching(); // TODO cascade
-  operations.activateDispatching(); // TODO cascade
-  transaction.activateDispatching();
+  operation.activeBubbleTargeting(); // TODO cascade
+  operations.activeBubbleTargeting(); // TODO cascade
+  transaction.activeBubbleTargeting();
 
   account["name"] = "Account6";
 
-  transaction.deactivateDispatching();
-  operations.deactivateDispatching();
-  operation.deactivateDispatching();
+  transaction.deactiveBubbleTargeting();
+  operations.deactiveBubbleTargeting();
+  operation.deactiveBubbleTargeting();
   transaction = null;
 
   account["name"] = "Account7";

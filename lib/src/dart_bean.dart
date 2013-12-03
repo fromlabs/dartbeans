@@ -46,9 +46,9 @@ class DartBeanProxy extends DartBean
   EventTargetDelegatee get delegateeTarget => _delegatorTarget != null ? null : this;
 }
 
-class DartBean extends BaseTarget implements ActivableTarget {
+class DartBean extends BaseTarget implements ActivableBubbleTarget {
 
-  bool _dispatchingActive;
+  bool _bubbleTargetingActive;
 
   final Map<String, dynamic> _propertyValues = {};
 
@@ -68,13 +68,13 @@ class DartBean extends BaseTarget implements ActivableTarget {
   Stream<PropertyChangedEvent> get onBubblePropertyChanged =>
 		onBubblePropertyChangedEvents.stream;
 
-  DartBean() : this._dispatchingActive = false, this._bubblingTargets = new LinkedHashMap();
+  DartBean() : this._bubbleTargetingActive = false, this._bubblingTargets = new LinkedHashMap();
 
-  bool get dispatchingActive => _dispatchingActive;
+  bool get bubbleTargetingActive => _bubbleTargetingActive;
 
-  void activateDispatching() {
-    if (!this._dispatchingActive) {
-      this._dispatchingActive = true;
+  void activeBubbleTargeting() {
+    if (!this._bubbleTargetingActive) {
+      this._bubbleTargetingActive = true;
 
       _bubblingTargets.forEach((bubblingId, bubblingTarget) {
         print("add bubbling target lazily");
@@ -83,9 +83,9 @@ class DartBean extends BaseTarget implements ActivableTarget {
     }
   }
 
-  void deactivateDispatching() {
-    if (this._dispatchingActive) {
-      this._dispatchingActive = false;
+  void deactiveBubbleTargeting() {
+    if (this._bubbleTargetingActive) {
+      this._bubbleTargetingActive = false;
 
       _bubblingTargets.keys.toList(growable: false).reversed.forEach((bubblingId) {
         print("remove bubbling target eagerly");
@@ -140,7 +140,7 @@ class DartBean extends BaseTarget implements ActivableTarget {
   }
 
   void _addBubblingTarget(dynamic bubblingId, BubblingTarget bubblingTarget) {
-    if (dispatchingActive) {
+    if (bubbleTargetingActive) {
       print("add bubbling target");
       bubblingTarget.addBubbleTarget(bubblingId, this);
     }
@@ -151,7 +151,7 @@ class DartBean extends BaseTarget implements ActivableTarget {
   void _removeBubblingTarget(dynamic bubblingId, BubblingTarget bubblingTarget) {
     _bubblingTargets.remove(bubblingId);
 
-    if (dispatchingActive) {
+    if (bubbleTargetingActive) {
       print("remove bubbling target");
       bubblingTarget.removeBubbleTarget(bubblingId, this);
     }

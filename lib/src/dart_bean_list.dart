@@ -6,7 +6,7 @@
 part of dartbeans;
 
 class DartBeanList<E extends DartBean> extends ListBase<E>
-    implements EventTargetDelegator, BubblingTarget, ActivableTarget, List<E> {
+    implements BubblingTarget, ActivableBubbleTarget, EventTargetDelegator, List<E> {
 
 	Stream<FLEvent> get onEventDispatched => _delegateeTarget.onEventDispatched;
 
@@ -28,11 +28,11 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
   EventTargetDelegatee get delegateeTarget => _delegateeTarget;
 
-  bool get dispatchingActive => _delegateeTarget.dispatchingActive;
+  bool get bubbleTargetingActive => _delegateeTarget.bubbleTargetingActive;
 
-  void activateDispatching() {
-    if (!_delegateeTarget.dispatchingActive) {
-      _delegateeTarget.activateDispatching();
+  void activeBubbleTargeting() {
+    if (!_delegateeTarget.bubbleTargetingActive) {
+      _delegateeTarget.activeBubbleTargeting();
 
       int index = 0;
       _backingList.forEach((bubblingTarget) {
@@ -42,9 +42,9 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
     }
   }
 
-  void deactivateDispatching() {
-    if (_delegateeTarget.dispatchingActive) {
-      _delegateeTarget.deactivateDispatching();
+  void deactiveBubbleTargeting() {
+    if (_delegateeTarget.bubbleTargetingActive) {
+      _delegateeTarget.deactiveBubbleTargeting();
 
       int index = _backingList.length;
       _backingList.reversed.forEach((bubblingTarget) {
@@ -152,14 +152,14 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 	}
 
   void _addBubblingTarget(int bubblingId, E bubblingTarget) {
-    if (dispatchingActive) {
+    if (bubbleTargetingActive) {
       print("add bubbling target");
       bubblingTarget.addBubbleTarget(bubblingId, this);
     }
   }
 
   void _removeBubblingTarget(int bubblingId, E bubblingTarget) {
-    if (dispatchingActive) {
+    if (bubbleTargetingActive) {
       print("remove bubbling target");
       bubblingTarget.removeBubbleTarget(bubblingId, this);
     }
@@ -265,7 +265,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
   }
 
 	void _adjustBubblingIds(int fromIndex, int delta) {
-	  if (dispatchingActive) {
+	  if (bubbleTargetingActive) {
 	    var i = fromIndex;
 	    if (delta > 0) {
 	      _backingList.sublist(fromIndex + delta).forEach((nextElement) {

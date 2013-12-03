@@ -44,7 +44,7 @@ class Person extends DartBean {
 
 void main() {
   Person person = new Person();
-  person.activateDispatching();
+  person.activeBubbleTargeting();
 
 	person.onNameChanged.listen((PropertyChangedEvent event) {
 		print("Property change ${event.property} = ${event.newValue} on ${event.target}");
@@ -64,7 +64,6 @@ void main() {
 
 	person.name = "Hans";
 	person.mother = new Person();
-	person.mother.activateDispatching();
 	person.mother.name = "Helga";
 	person.mother.refresh();
 	person.refresh();

@@ -300,8 +300,11 @@ class FLEventStreamProvider<T extends FLEvent>
   }
 
   void dispatch(T event) {
-		if (target != null &&
+/*
+    if (target != null &&
 		    (target is! ActivableTarget || (target as ActivableTarget).dispatchingActive)) {
+*/
+    if (target != null) {
 			_complete(event);
 
 			_dispatchEvent(event, this);
