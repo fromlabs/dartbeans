@@ -36,7 +36,6 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
       int index = 0;
       _backingList.forEach((bubblingTarget) {
-        print("add bubbling target lazily");
         bubblingTarget.addBubbleTarget(index++, this);
       });
     }
@@ -48,7 +47,6 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
       int index = _backingList.length;
       _backingList.reversed.forEach((bubblingTarget) {
-        print("remove bubbling target eagerly");
         bubblingTarget.removeBubbleTarget(--index, this);
       });
     }
@@ -153,14 +151,12 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
   void _addBubblingTarget(int bubblingId, E bubblingTarget) {
     if (bubbleTargetingActive) {
-      print("add bubbling target");
       bubblingTarget.addBubbleTarget(bubblingId, this);
     }
   }
 
   void _removeBubblingTarget(int bubblingId, E bubblingTarget) {
     if (bubbleTargetingActive) {
-      print("remove bubbling target");
       bubblingTarget.removeBubbleTarget(bubblingId, this);
     }
   }
