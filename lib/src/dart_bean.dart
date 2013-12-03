@@ -77,7 +77,6 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
       this._bubbleTargetingActive = true;
 
       _bubblingTargets.forEach((bubblingId, bubblingTarget) {
-        print("add bubbling target lazily");
         bubblingTarget.addBubbleTarget(bubblingId, this);
       });
     }
@@ -88,7 +87,6 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
       this._bubbleTargetingActive = false;
 
       _bubblingTargets.keys.toList(growable: false).reversed.forEach((bubblingId) {
-        print("remove bubbling target eagerly");
         _bubblingTargets[bubblingId].removeBubbleTarget(bubblingId, this);
       });
     }
@@ -141,7 +139,6 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
 
   void _addBubblingTarget(dynamic bubblingId, BubblingTarget bubblingTarget) {
     if (bubbleTargetingActive) {
-      print("add bubbling target");
       bubblingTarget.addBubbleTarget(bubblingId, this);
     }
 
@@ -152,7 +149,6 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
     _bubblingTargets.remove(bubblingId);
 
     if (bubbleTargetingActive) {
-      print("remove bubbling target");
       bubblingTarget.removeBubbleTarget(bubblingId, this);
     }
   }
