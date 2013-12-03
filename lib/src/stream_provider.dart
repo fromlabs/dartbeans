@@ -185,13 +185,13 @@ abstract class StreamProvider<T extends FLEvent> {
     if (_hostProvider != null) {
       _hostProvider._dispatchEvent(event, _targetProvider);
     } else {
-      // TODO check if bubbling is enabled here!
       _dispatchBubbleEvent(event, _targetProvider);
     }
   }
 
   void _dispatchBubbleEvent(FLEvent event,
       StreamProvider<T> _targetProvider) {
+    // TODO check if bubbling is enabled here!
     if (_bubbleProviders != null) {
       _bubbleProviders.forEach((BubbleProviderReference reference) {
 				var targetReference = new BubbleTargetReference(reference.bubblingId, reference.bubbleProvider.target);
@@ -300,7 +300,8 @@ class FLEventStreamProvider<T extends FLEvent>
   }
 
   void dispatch(T event) {
-		if (target != null) {
+		if (target != null &&
+		    (target is! ActivableTarget || (target as ActivableTarget).dispatchingActive)) {
 			_complete(event);
 
 			_dispatchEvent(event, this);

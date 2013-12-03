@@ -10,6 +10,7 @@ typedef void ActionExecution();
 typedef PropertyCalculation();
 
 class ListenerBinder {
+
   List<StreamSubscription> _subscriptions = [];
 
   var _onData;
@@ -42,6 +43,7 @@ class ListenerBinder {
 }
 
 class ActionBinder extends ListenerBinder {
+
   ActionExecution _execute;
 
   ActionBinder(this._execute) : super(null) {

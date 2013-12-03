@@ -5,34 +5,61 @@
 
 part of dartbeans;
 
-class DartBeanList<E extends DartBean> extends ListBase<E> implements EventTargetDelegator, List<E> {
+class DartBeanList<E extends DartBean> extends ListBase<E>
+    implements EventTargetDelegator, BubblingTarget, ActivableTarget, List<E> {
 
-	Stream<FLEvent> get onEventDispatched => _delegate.onEventDispatched;
+	Stream<FLEvent> get onEventDispatched => _delegateeTarget.onEventDispatched;
 
-  Stream<FLEvent> get onBubbleEventDispatched => _delegate.onBubbleEventDispatched;
+  Stream<FLEvent> get onBubbleEventDispatched => _delegateeTarget.onBubbleEventDispatched;
 
-  Stream<PropertyChangedEvent> get onPropertyChanged => _delegate.onPropertyChanged;
+  Stream<PropertyChangedEvent> get onPropertyChanged => _delegateeTarget.onPropertyChanged;
 
-  Stream<PropertyChangedEvent> get onBubblePropertyChanged => _delegate.onBubblePropertyChanged;
+  Stream<PropertyChangedEvent> get onBubblePropertyChanged => _delegateeTarget.onBubblePropertyChanged;
 
   List<E> _backingList;
 
-  ProxyDartBean _delegate;
+  DartBeanProxy _delegateeTarget;
 
   DartBeanList() {
-		_delegate = new ProxyDartBean(this);
+    _delegateeTarget = new DartBeanProxy(this);
 
     _backingList = new List<E>();
   }
 
-	FLEventTarget get delegate => _delegate;
+  EventTargetDelegatee get delegateeTarget => _delegateeTarget;
+
+  bool get dispatchingActive => _delegateeTarget.dispatchingActive;
+
+  void activateDispatching() {
+    if (!_delegateeTarget.dispatchingActive) {
+      _delegateeTarget.activateDispatching();
+
+      int index = 0;
+      _backingList.forEach((bubblingTarget) {
+        print("add bubbling target lazily");
+        bubblingTarget.addBubbleTarget(index++, this);
+      });
+    }
+  }
+
+  void deactivateDispatching() {
+    if (_delegateeTarget.dispatchingActive) {
+      _delegateeTarget.deactivateDispatching();
+
+      int index = _backingList.length;
+      _backingList.reversed.forEach((bubblingTarget) {
+        print("remove bubbling target eagerly");
+        bubblingTarget.removeBubbleTarget(--index, this);
+      });
+    }
+  }
 
   void addBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget) {
-		_delegate.addBubbleTarget(bubblingId, bubbleTarget);
+		_delegateeTarget.addBubbleTarget(bubblingId, bubbleTarget);
   }
 
   void removeBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget) {
-		_delegate.removeBubbleTarget(bubblingId, bubbleTarget);
+    _delegateeTarget.removeBubbleTarget(bubblingId, bubbleTarget);
   }
 
 	void addPropertyValue(int index, E value,
@@ -40,7 +67,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E> implements EventTarge
 	  			void onPostDispatched(PropertyChangedEvent event),
 				bool adjustBubblingIds: true}) {
 		if (value is BubblingTarget) {
-			value.addBubbleTarget(index, this);
+			_addBubblingTarget(index, value);
 		}
 
 		_backingList.insert(index, value);
@@ -55,7 +82,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E> implements EventTarge
     		onPreDispatching(event);
     }
 
-		_delegate.dispatchPropertyChanged(index, event);
+    _delegateeTarget.dispatchPropertyChanged(index, event);
 
     if (onPostDispatched != null) {
 			onPostDispatched(event);
@@ -71,13 +98,13 @@ class DartBeanList<E extends DartBean> extends ListBase<E> implements EventTarge
 
 		if(forceUpdate || value != previous) {
 			if (previous is BubblingTarget) {
-				previous.removeBubbleTarget(index, this);
+				_removeBubblingTarget(index, previous);
 			}
 
 		  _backingList[index] = value;
 
 			if (value is BubblingTarget) {
-				value.addBubbleTarget(index, this);
+				_addBubblingTarget(index, value);
 			}
 
 			PropertyChangedEvent event = new PropertyChangedEvent(value, previous);
@@ -86,7 +113,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E> implements EventTarge
   				onPreDispatching(event);
 	    }
 
-			_delegate.dispatchPropertyChanged(index, event);
+	    _delegateeTarget.dispatchPropertyChanged(index, event);
 
 	    if (onPostDispatched != null) {
 				onPostDispatched(event);
@@ -102,7 +129,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E> implements EventTarge
 
 		if (removed != null) {
 			if (removed is BubblingTarget) {
-				removed.removeBubbleTarget(index, this);
+				_removeBubblingTarget(index, removed);
 			}
 
 			// adjust next bubblingIds
@@ -116,13 +143,27 @@ class DartBeanList<E extends DartBean> extends ListBase<E> implements EventTarge
 	    		onPreDispatching(event);
 	    }
 
-			_delegate.dispatchPropertyChanged(index, event);
+	    _delegateeTarget.dispatchPropertyChanged(index, event);
 
 	    if (onPostDispatched != null) {
 				onPostDispatched(event);
 	    }
 		}
 	}
+
+  void _addBubblingTarget(int bubblingId, E bubblingTarget) {
+    if (dispatchingActive) {
+      print("add bubbling target");
+      bubblingTarget.addBubbleTarget(bubblingId, this);
+    }
+  }
+
+  void _removeBubblingTarget(int bubblingId, E bubblingTarget) {
+    if (dispatchingActive) {
+      print("remove bubbling target");
+      bubblingTarget.removeBubbleTarget(bubblingId, this);
+    }
+  }
 
   int get length => _backingList.length;
 
@@ -224,26 +265,28 @@ class DartBeanList<E extends DartBean> extends ListBase<E> implements EventTarge
   }
 
 	void _adjustBubblingIds(int fromIndex, int delta) {
-		var i = fromIndex;
-		if (delta > 0) {
-			_backingList.sublist(fromIndex + delta).forEach((nextElement) {
-				if (nextElement is BubblingTarget) {
-					nextElement.removeBubbleTarget(i , this);
-					nextElement.addBubbleTarget(i + delta, this);
-				}
+	  if (dispatchingActive) {
+	    var i = fromIndex;
+	    if (delta > 0) {
+	      _backingList.sublist(fromIndex + delta).forEach((nextElement) {
+	        if (nextElement is BubblingTarget) {
+	          nextElement.removeBubbleTarget(i , this);
+	          nextElement.addBubbleTarget(i + delta, this);
+	        }
 
-				i++;
-			});
-		} else {
-			_backingList.sublist(fromIndex).forEach((nextElement) {
-				if (nextElement is BubblingTarget) {
-					nextElement.removeBubbleTarget(i - delta, this);
-					nextElement.addBubbleTarget(i, this);
-				}
+	        i++;
+	      });
+	    } else {
+	      _backingList.sublist(fromIndex).forEach((nextElement) {
+	        if (nextElement is BubblingTarget) {
+	          nextElement.removeBubbleTarget(i - delta, this);
+	          nextElement.addBubbleTarget(i, this);
+	        }
 
-				i++;
-			});
-		}
+	        i++;
+	      });
+	    }
+	  }
 	}
 
 	void _throwTodoError() {

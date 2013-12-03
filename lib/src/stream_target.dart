@@ -10,33 +10,46 @@ abstract class FLEventTarget {}
 
 /// Interface used by types that bubble events to parent targets.
 abstract class BubblingTarget implements FLEventTarget {
+
 	void addBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget);
+
 	void removeBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget);
 }
 
+///
+abstract class ActivableTarget implements FLEventTarget {
+
+  bool get dispatchingActive;
+
+  void activateDispatching();
+
+  void deactivateDispatching();
+}
+
 /// Interface used by types that proxy targets for event notification.
-abstract class EventTargetProxy implements FLEventTarget {
+abstract class EventTargetDelegatee implements FLEventTarget {
   /// The proxied target.
-  FLEventTarget get target;
+  EventTargetDelegator get delegatorTarget;
 }
 
 abstract class EventTargetDelegator implements FLEventTarget {
-	FLEventTarget get delegate;
+  EventTargetDelegatee get delegateeTarget;
 }
 
-class ProxyBaseTarget extends BaseTarget
-    implements EventTargetProxy {
+class EventTargetProxy extends BaseTarget
+    implements EventTargetDelegatee, EventTargetDelegator {
 
-  FLEventTarget _target;
+  EventTargetDelegator _delegatorTarget;
 
-  ProxyBaseTarget([FLEventTarget target]) {
-    this._target = target != null ? target : this;
-  }
+  EventTargetProxy([this._delegatorTarget]);
 
-  FLEventTarget get target => _target;
+  EventTargetDelegator get delegatorTarget => _delegatorTarget != null ? _delegatorTarget : this;
+
+  EventTargetDelegatee get delegateeTarget => _delegatorTarget != null ? null : this;
 }
 
 abstract class BaseTarget implements BubblingTarget {
+
   final ToRouteEventStreamProvider _eventProvider =
       new ToRouteEventStreamProvider();
 
@@ -81,7 +94,7 @@ abstract class BaseTarget implements BubblingTarget {
 		if (bubbleTarget is BaseTarget) {
 			_eventProvider.addBubbleTargetProvider(bubblingId, bubbleTarget._eventProvider);
 		} else if (bubbleTarget is EventTargetDelegator) {
-			addBubbleTarget(bubblingId, bubbleTarget.delegate);
+			addBubbleTarget(bubblingId, bubbleTarget.delegateeTarget);
 		} else {
 			throw new ArgumentError("Event target ${bubbleTarget.runtimeType} not supported for bubbling!");
 		}
@@ -91,7 +104,7 @@ abstract class BaseTarget implements BubblingTarget {
 		if (bubbleTarget is BaseTarget) {
 			_eventProvider.removeBubbleTargetProvider(bubblingId, bubbleTarget._eventProvider);
 		} else if (bubbleTarget is EventTargetDelegator) {
-			removeBubbleTarget(bubblingId, bubbleTarget.delegate);
+			removeBubbleTarget(bubblingId, bubbleTarget.delegateeTarget);
 		} else {
 			throw new ArgumentError("Event target ${bubbleTarget.runtimeType} not supported for bubbling!");
 		}

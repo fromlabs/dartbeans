@@ -7,6 +7,7 @@ part of dartbeans;
 
 /// A base event received by a [FLEventTarget].
 class FLEvent {
+
 	FLEventTarget _target;
 
 	String _type;
@@ -18,8 +19,8 @@ class FLEvent {
 
   /// Returns the target that first received the event.
   FLEventTarget get target {
-    return (_target is EventTargetProxy ?
-          (_target as EventTargetProxy).target : _target);
+    return (_target is EventTargetDelegatee ?
+          (_target as EventTargetDelegatee).delegatorTarget : _target);
   }
 
   /// Whether the event is received during the bubbling phase.
@@ -32,8 +33,8 @@ class FLEvent {
    */
   FLEventTarget get bubbleTarget {
 		var bubbleTarget = bubbled ? _bubbleReferences.last.bubbleTarget : null;
-    	return (bubbleTarget is EventTargetProxy ?
-    			(bubbleTarget as EventTargetProxy).target : bubbleTarget);
+    	return (bubbleTarget is EventTargetDelegatee ?
+    			(bubbleTarget as EventTargetDelegatee).delegatorTarget : bubbleTarget);
   }
 
   /**
@@ -58,8 +59,8 @@ class FLEvent {
 		StringBuffer buffer = new StringBuffer();
 
 		_bubbleReferences.reversed.forEach((reference) {
-			buffer.write((reference.bubbleTarget is EventTargetProxy ?
-				(reference.bubbleTarget as EventTargetProxy).target : reference.bubbleTarget));
+			buffer.write((reference.bubbleTarget is EventTargetDelegatee ?
+				(reference.bubbleTarget as EventTargetDelegatee).delegatorTarget : reference.bubbleTarget));
 			buffer
 				..write("/")
 				..write(reference.bubblingId)

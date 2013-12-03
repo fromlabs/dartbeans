@@ -16,7 +16,7 @@ void main() {
   /* Simple event stream provider */
 
   group('Simple event stream provider - management:', () {
-    FLEventTarget target = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
 
     test('Target no set', () {
       FLEventStreamProvider provider = new FLEventStreamProvider(RENDERED_EVENT_TYPE);
@@ -32,13 +32,13 @@ void main() {
     test('Target set twice but different', () {
       FLEventStreamProvider provider = new FLEventStreamProvider(RENDERED_EVENT_TYPE);
       provider.forTarget(target);
-      expect(() => provider.target = new ProxyBaseTarget(), throwsStateError);
+      expect(() => provider.target = new EventTargetProxy(), throwsStateError);
     });
   });
 
   group('Simple event stream provider bubble - management:', () {
-    FLEventTarget target = new ProxyBaseTarget();
-    FLEventTarget bubbleTarget = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
+    FLEventTarget bubbleTarget = new EventTargetProxy();
 
     test('Already added bubble provider', () {
       FLEventStreamProvider provider = new FLEventStreamProvider(RENDERED_EVENT_TYPE, target);
@@ -57,7 +57,7 @@ void main() {
   });
 
   group('Simple event stream provider - events:', () {
-    FLEventTarget target = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
     FLEventStreamProvider provider;
 
     setUp(() {
@@ -77,8 +77,8 @@ void main() {
   });
 
   group('Simple event stream provider bubble - events:', () {
-    FLEventTarget target = new ProxyBaseTarget();
-    FLEventTarget bubbleTarget = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
+    FLEventTarget bubbleTarget = new EventTargetProxy();
 
     test('Listen bubble events', () {
       FLEventStreamProvider provider = new FLEventStreamProvider(RENDERED_EVENT_TYPE, target);
@@ -111,7 +111,7 @@ void main() {
   /* Discriminated event stream provider */
 
   group('Discriminated event stream provider - management:', () {
-    FLEventTarget target = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
 
     test('Event type with discriminator postfix', () {
       expect(() => new DiscriminatedEventStreamProvider(RENDERED_EVENT_TYPE, "name"), throwsArgumentError);
@@ -119,7 +119,7 @@ void main() {
   });
 
   group('Discriminated event stream provider - events:', () {
-    FLEventTarget target = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
     DiscriminatedEventStreamProvider nameUpdatedProvider;
     DiscriminatedEventStreamProvider addressUpdatedProvider;
     setUp(() {
@@ -144,7 +144,7 @@ void main() {
   /* To discriminate event stream provider */
 
   group('To discriminate event stream provider - management:', () {
-    FLEventTarget target = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
 
     test('Target set on hosted provider', () {
       ToDiscriminateEventStreamProvider updatedProvider = new ToDiscriminateEventStreamProvider(UPDATED_EVENT_TYPE);
@@ -160,8 +160,8 @@ void main() {
   });
 
   group('To discriminate event stream provider bubble - management:', () {
-    FLEventTarget target = new ProxyBaseTarget();
-    FLEventTarget bubbleTarget = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
+    FLEventTarget bubbleTarget = new EventTargetProxy();
 
     test('Add bubble provider on hosted provider', () {
       ToDiscriminateEventStreamProvider updatedProvider = new ToDiscriminateEventStreamProvider(UPDATED_EVENT_TYPE);
@@ -179,7 +179,7 @@ void main() {
   });
 
   group('To discriminate event stream provider - events:', () {
-    FLEventTarget target = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
     ToDiscriminateEventStreamProvider updatedProvider;
     setUp(() {
       updatedProvider = new ToDiscriminateEventStreamProvider(UPDATED_EVENT_TYPE, target);
@@ -201,8 +201,8 @@ void main() {
   });
 
   group('To discriminate event stream provider bubble - events:', () {
-    FLEventTarget target = new ProxyBaseTarget();
-    FLEventTarget bubbleTarget = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
+    FLEventTarget bubbleTarget = new EventTargetProxy();
 
     ToDiscriminateEventStreamProvider updatedProvider;
     ToDiscriminateEventStreamProvider bubbleUpdatedProvider;
@@ -265,7 +265,7 @@ void main() {
   /* To route event stream provider */
 
   group('To route event stream provider - management:', () {
-    FLEventTarget target = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
 
     test('Target set on hosted provider', () {
       ToRouteEventStreamProvider provider = new ToRouteEventStreamProvider();
@@ -281,7 +281,7 @@ void main() {
   });
 
   group('To route event stream provider - events:', () {
-    FLEventTarget target = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
     ToRouteEventStreamProvider provider;
     setUp(() {
       provider = new ToRouteEventStreamProvider(target);
@@ -306,8 +306,8 @@ void main() {
   });
 
   group('To route event stream provider bubble - events:', () {
-    FLEventTarget target = new ProxyBaseTarget();
-    FLEventTarget bubbleTarget = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
+    FLEventTarget bubbleTarget = new EventTargetProxy();
 
     ToRouteEventStreamProvider provider;
     ToRouteEventStreamProvider bubbledProvider;
@@ -384,7 +384,7 @@ void main() {
   /* Stream binders */
 
   group('To route event stream provider - events:', () {
-    FLEventTarget target = new ProxyBaseTarget();
+    FLEventTarget target = new EventTargetProxy();
     ToRouteEventStreamProvider provider;
     setUp(() {
       provider = new ToRouteEventStreamProvider(target);

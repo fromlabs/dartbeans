@@ -35,6 +35,7 @@ class Person extends DartBean {
 
 void main() {
   Person person = new Person();
+  person.activateDispatching();
 
 	person.onNameChanged.listen((PropertyChangedEvent event) {
 		print("Property change ${event.property} = ${event.newValue}"

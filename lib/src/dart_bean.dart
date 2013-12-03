@@ -34,20 +34,25 @@ class PropertyChangedEvent extends DiscriminatedEvent {
     		=> new PropertyChangedEvent._clone(newValue, oldValue, added, removed);
 }
 
-class ProxyDartBean extends DartBean
-    implements EventTargetProxy {
+class DartBeanProxy extends DartBean
+    implements EventTargetDelegatee, EventTargetDelegator {
 
-  FLEventTarget _target;
+  EventTargetDelegator _delegatorTarget;
 
-	ProxyDartBean([FLEventTarget target]) {
-    this._target = target != null ? target : this;
-  }
+  DartBeanProxy([this._delegatorTarget]);
 
-  FLEventTarget get target => _target;
+  EventTargetDelegator get delegatorTarget => _delegatorTarget != null ? _delegatorTarget : this;
+
+  EventTargetDelegatee get delegateeTarget => _delegatorTarget != null ? null : this;
 }
 
-class DartBean extends BaseTarget {
+class DartBean extends BaseTarget implements ActivableTarget {
+
+  bool _dispatchingActive;
+
   final Map<String, dynamic> _propertyValues = {};
+
+  final LinkedHashMap<String, BubblingTarget> _bubblingTargets;
 
   DiscriminatorStreams<PropertyChangedEvent> get
     onPropertyChangedEvents =>
@@ -62,6 +67,32 @@ class DartBean extends BaseTarget {
 
   Stream<PropertyChangedEvent> get onBubblePropertyChanged =>
 		onBubblePropertyChangedEvents.stream;
+
+  DartBean() : this._dispatchingActive = false, this._bubblingTargets = new LinkedHashMap();
+
+  bool get dispatchingActive => _dispatchingActive;
+
+  void activateDispatching() {
+    if (!this._dispatchingActive) {
+      this._dispatchingActive = true;
+
+      _bubblingTargets.forEach((bubblingId, bubblingTarget) {
+        print("add bubbling target lazily");
+        bubblingTarget.addBubbleTarget(bubblingId, this);
+      });
+    }
+  }
+
+  void deactivateDispatching() {
+    if (this._dispatchingActive) {
+      this._dispatchingActive = false;
+
+      _bubblingTargets.keys.toList(growable: false).reversed.forEach((bubblingId) {
+        print("remove bubbling target eagerly");
+        _bubblingTargets[bubblingId].removeBubbleTarget(bubblingId, this);
+      });
+    }
+  }
 
   operator [](String property) => getPropertyValue(property);
 
@@ -80,13 +111,13 @@ class DartBean extends BaseTarget {
     var old = exist ? _propertyValues[property] : null;
     if(forceUpdate || value != old) {
 			if (old is BubblingTarget) {
-				old.removeBubbleTarget(property, this);
+				_removeBubblingTarget(property, old);
 			}
 
       _propertyValues[property] = value;
 
 			if (value is BubblingTarget) {
-				value.addBubbleTarget(property, this);
+			  _addBubblingTarget(property, value);
 			}
 
       PropertyChangedEvent event = exist ? new PropertyChangedEvent(value, old)
@@ -105,6 +136,24 @@ class DartBean extends BaseTarget {
       return true;
     } else {
       return false;
+    }
+  }
+
+  void _addBubblingTarget(dynamic bubblingId, BubblingTarget bubblingTarget) {
+    if (dispatchingActive) {
+      print("add bubbling target");
+      bubblingTarget.addBubbleTarget(bubblingId, this);
+    }
+
+    _bubblingTargets[bubblingId] = bubblingTarget;
+  }
+
+  void _removeBubblingTarget(dynamic bubblingId, BubblingTarget bubblingTarget) {
+    _bubblingTargets.remove(bubblingId);
+
+    if (dispatchingActive) {
+      print("remove bubbling target");
+      bubblingTarget.removeBubbleTarget(bubblingId, this);
     }
   }
 

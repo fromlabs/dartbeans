@@ -1,7 +1,9 @@
 name: dartbeans
 version: 0.2.0
 author: Roberto Tassi <roberto.tassi@fromlabs.org>
-description: DartBeans is a Dart library that helps working with event streams.
+description: A Dart library that helps working with event streams.
 homepage: https://github.com/fromlabs/dartbeans
+environment:
+  sdk: '>=0.8.10+6 <2.0.0'
 dev_dependencies:
-  unittest: '>=0.8.5 <0.9.0'
+  unittest: '>=0.8.5 <2.0.0'

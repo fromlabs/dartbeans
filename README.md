@@ -3,7 +3,7 @@
 DartBeans
 ===
 
-DartBeans is a Dart library that helps working with event streams.
+A Dart library that helps working with event streams.
 
 To know something more about the released version have a look at the
 [CHANGELOG][changelog].
@@ -25,7 +25,7 @@ To know something more about the released version have a look at the
 ```yaml
 dependencies:
 	dartbeans: any
-	
+
 ```
 
 **2.** Add `dartbeans` to your code and run it:
@@ -71,9 +71,9 @@ class Person extends DartBean {
 Property changed event streams are exposed by the `onPropertyChangedEvents` getter on the `DartBean` class and can be accessed in a convenient way:
 
 ```dart
-	Stream<PropertyChangedEvent> get onNameChanged => 
+	Stream<PropertyChangedEvent> get onNameChanged =>
 		onPropertyChangedEvents[NAME];
-	Stream<PropertyChangedEvent> get onAgeChanged => 
+	Stream<PropertyChangedEvent> get onAgeChanged =>
 		onPropertyChangedEvents[AGE];
 ```
 
@@ -81,9 +81,9 @@ Custom events can be easily implemented:
 
 ```dart
 	static const REFRESHED_EVENT_TYPE = "refreshed";
-	
+
 	Stream<FLEvent> get onRefreshed => onEvents[REFRESHED_EVENT_TYPE];
-	
+
 	void refresh() {
 		dispatch(REFRESHED_EVENT_TYPE); // dispatch an FLEvent
 	}
