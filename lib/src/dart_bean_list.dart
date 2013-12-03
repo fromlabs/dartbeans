@@ -28,11 +28,11 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
   EventTargetDelegatee get delegateeTarget => _delegateeTarget;
 
-  bool get bubbleTargetingActive => _delegateeTarget.bubbleTargetingActive;
+  bool get bubbleTargetingEnabled => _delegateeTarget.bubbleTargetingEnabled;
 
-  void activeBubbleTargeting() {
-    if (!_delegateeTarget.bubbleTargetingActive) {
-      _delegateeTarget.activeBubbleTargeting();
+  void enableBubbleTargeting() {
+    if (!_delegateeTarget.bubbleTargetingEnabled) {
+      _delegateeTarget.enableBubbleTargeting();
 
       int index = 0;
       _backingList.forEach((bubblingTarget) {
@@ -41,9 +41,9 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
     }
   }
 
-  void deactiveBubbleTargeting() {
-    if (_delegateeTarget.bubbleTargetingActive) {
-      _delegateeTarget.deactiveBubbleTargeting();
+  void disableBubbleTargeting() {
+    if (_delegateeTarget.bubbleTargetingEnabled) {
+      _delegateeTarget.disableBubbleTargeting();
 
       int index = _backingList.length;
       _backingList.reversed.forEach((bubblingTarget) {
@@ -150,13 +150,13 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 	}
 
   void _addBubblingTarget(int bubblingId, E bubblingTarget) {
-    if (bubbleTargetingActive) {
+    if (bubbleTargetingEnabled) {
       bubblingTarget.addBubbleTarget(bubblingId, this);
     }
   }
 
   void _removeBubblingTarget(int bubblingId, E bubblingTarget) {
-    if (bubbleTargetingActive) {
+    if (bubbleTargetingEnabled) {
       bubblingTarget.removeBubbleTarget(bubblingId, this);
     }
   }
@@ -261,7 +261,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
   }
 
 	void _adjustBubblingIds(int fromIndex, int delta) {
-	  if (bubbleTargetingActive) {
+	  if (bubbleTargetingEnabled) {
 	    var i = fromIndex;
 	    if (delta > 0) {
 	      _backingList.sublist(fromIndex + delta).forEach((nextElement) {

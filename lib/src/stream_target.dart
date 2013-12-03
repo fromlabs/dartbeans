@@ -11,11 +11,11 @@ abstract class FLEventTarget {}
 ///
 abstract class ActivableBubbleTarget implements FLEventTarget {
 
-  bool get bubbleTargetingActive;
+  bool get bubbleTargetingEnabled;
 
-  void activeBubbleTargeting();
+  void enableBubbleTargeting();
 
-  void deactiveBubbleTargeting();
+  void disableBubbleTargeting();
 }
 
 /// Interface used by types that bubble events to parent targets.

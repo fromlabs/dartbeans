@@ -48,7 +48,7 @@ class DartBeanProxy extends DartBean
 
 class DartBean extends BaseTarget implements ActivableBubbleTarget {
 
-  bool _bubbleTargetingActive;
+  bool _bubbleTargetingEnabled;
 
   final Map<String, dynamic> _propertyValues = {};
 
@@ -68,13 +68,13 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
   Stream<PropertyChangedEvent> get onBubblePropertyChanged =>
 		onBubblePropertyChangedEvents.stream;
 
-  DartBean() : this._bubbleTargetingActive = false, this._bubblingTargets = new LinkedHashMap();
+  DartBean() : this._bubbleTargetingEnabled = false, this._bubblingTargets = new LinkedHashMap();
 
-  bool get bubbleTargetingActive => _bubbleTargetingActive;
+  bool get bubbleTargetingEnabled => _bubbleTargetingEnabled;
 
-  void activeBubbleTargeting() {
-    if (!this._bubbleTargetingActive) {
-      this._bubbleTargetingActive = true;
+  void enableBubbleTargeting() {
+    if (!this._bubbleTargetingEnabled) {
+      this._bubbleTargetingEnabled = true;
 
       _bubblingTargets.forEach((bubblingId, bubblingTarget) {
         bubblingTarget.addBubbleTarget(bubblingId, this);
@@ -82,9 +82,9 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
     }
   }
 
-  void deactiveBubbleTargeting() {
-    if (this._bubbleTargetingActive) {
-      this._bubbleTargetingActive = false;
+  void disableBubbleTargeting() {
+    if (this._bubbleTargetingEnabled) {
+      this._bubbleTargetingEnabled = false;
 
       _bubblingTargets.keys.toList(growable: false).reversed.forEach((bubblingId) {
         _bubblingTargets[bubblingId].removeBubbleTarget(bubblingId, this);
@@ -138,7 +138,7 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
   }
 
   void _addBubblingTarget(dynamic bubblingId, BubblingTarget bubblingTarget) {
-    if (bubbleTargetingActive) {
+    if (bubbleTargetingEnabled) {
       bubblingTarget.addBubbleTarget(bubblingId, this);
     }
 
@@ -148,7 +148,7 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
   void _removeBubblingTarget(dynamic bubblingId, BubblingTarget bubblingTarget) {
     _bubblingTargets.remove(bubblingId);
 
-    if (bubbleTargetingActive) {
+    if (bubbleTargetingEnabled) {
       bubblingTarget.removeBubbleTarget(bubblingId, this);
     }
   }

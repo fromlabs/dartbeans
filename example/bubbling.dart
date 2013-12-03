@@ -44,7 +44,7 @@ class Person extends DartBean {
 
 void main() {
   Person person = new Person();
-  person.activeBubbleTargeting();
+  person.enableBubbleTargeting();
 
 	person.onNameChanged.listen((PropertyChangedEvent event) {
 		print("Property change ${event.property} = ${event.newValue} on ${event.target}");
