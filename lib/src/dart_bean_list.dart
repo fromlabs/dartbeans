@@ -16,17 +16,29 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
   Stream<PropertyChangedEvent> get onBubblePropertyChanged => _delegateeTarget.onBubblePropertyChanged;
 
-  List<E> _backingList;
+  final List<E> _backingList;
+
+  bool _bubbleTargetActivationCascading;
 
   DartBeanProxy _delegateeTarget;
 
-  DartBeanList() {
+  DartBeanList({bubbleTargetActivationCascading: false}) :
+      _backingList = new List<E>(),
+      this._bubbleTargetActivationCascading = bubbleTargetActivationCascading {
     _delegateeTarget = new DartBeanProxy(this);
-
-    _backingList = new List<E>();
   }
 
   EventTargetDelegatee get delegateeTarget => _delegateeTarget;
+
+  bool get isBubbleTargetActivationCascading => _bubbleTargetActivationCascading;
+
+  void set isBubbleTargetActivationCascading(bubbleTargetActivationCascading) {
+    if (bubbleTargetingEnabled) {
+      throw new StateError("Can't change bubble target activation cascading descriptor when the bean is is enabled for bubble targeting!");
+    }
+
+    _bubbleTargetActivationCascading = bubbleTargetActivationCascading;
+  }
 
   bool get bubbleTargetingEnabled => _delegateeTarget.bubbleTargetingEnabled;
 
@@ -36,6 +48,14 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
       int index = 0;
       _backingList.forEach((bubblingTarget) {
+        if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading) {
+          if (bubblingTarget is DartBeanList && !bubblingTarget.isBubbleTargetActivationCascading) {
+            bubblingTarget.isBubbleTargetActivationCascading = true;
+          }
+
+          bubblingTarget.enableBubbleTargeting();
+        }
+
         bubblingTarget.addBubbleTarget(index++, this);
       });
     }
@@ -48,6 +68,10 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
       int index = _backingList.length;
       _backingList.reversed.forEach((bubblingTarget) {
         bubblingTarget.removeBubbleTarget(--index, this);
+
+        if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading) {
+          bubblingTarget.disableBubbleTargeting();
+        }
       });
     }
   }
@@ -149,15 +173,27 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 		}
 	}
 
-  void _addBubblingTarget(int bubblingId, E bubblingTarget) {
+  void _addBubblingTarget(int bubblingId, BubblingTarget bubblingTarget) {
     if (bubbleTargetingEnabled) {
+      if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading) {
+        if (bubblingTarget is DartBeanList && !bubblingTarget.isBubbleTargetActivationCascading) {
+          bubblingTarget.isBubbleTargetActivationCascading = true;
+        }
+
+        (bubblingTarget as ActivableBubbleTarget).enableBubbleTargeting();
+      }
+
       bubblingTarget.addBubbleTarget(bubblingId, this);
     }
   }
 
-  void _removeBubblingTarget(int bubblingId, E bubblingTarget) {
+  void _removeBubblingTarget(int bubblingId, BubblingTarget bubblingTarget) {
     if (bubbleTargetingEnabled) {
       bubblingTarget.removeBubbleTarget(bubblingId, this);
+
+      if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading) {
+        (bubblingTarget as ActivableBubbleTarget).disableBubbleTargeting();
+      }
     }
   }
 

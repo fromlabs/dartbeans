@@ -191,27 +191,30 @@ abstract class StreamProvider<T extends FLEvent> {
 
   void _dispatchBubbleEvent(FLEvent event,
       StreamProvider<T> _targetProvider) {
-    // TODO check if bubbling is enabled here!
+    // TODO check if bubbling for this event type is enabled here!
     if (_bubbleProviders != null) {
       _bubbleProviders.forEach((BubbleProviderReference reference) {
-				var targetReference = new BubbleTargetReference(reference.bubblingId, reference.bubbleProvider.target);
-				if (!event._contains(targetReference)) {
-	        var targetBubbleProvider =
-	            _targetProvider._getBubbleProvider(reference.bubbleProvider);
+        var bubbleTarget = reference.bubbleProvider.target;
+        if (bubbleTarget is! ActivableBubbleTarget || bubbleTarget.bubbleTargetingEnabled) {
+          var targetReference = new BubbleTargetReference(reference.bubblingId, bubbleTarget);
+          if (!event._contains(targetReference)) {
+            var targetBubbleProvider =
+                _targetProvider._getBubbleProvider(reference.bubbleProvider);
 
-	        FLEvent clonedEvent = event.clone();
-	        if (clonedEvent.runtimeType != event.runtimeType) {
-	          throw new UnimplementedError("Implement clone method " +
-	              "${event.runtimeType}.clone()");
-	        }
+            FLEvent clonedEvent = event.clone();
+            if (clonedEvent.runtimeType != event.runtimeType) {
+              throw new UnimplementedError("Implement clone method " +
+                  "${event.runtimeType}.clone()");
+            }
 
-					clonedEvent._target = event._target;
-					clonedEvent._bubbleReferences = new List.from(event._bubbleReferences);
+            clonedEvent._target = event._target;
+            clonedEvent._bubbleReferences = new List.from(event._bubbleReferences);
 
-					clonedEvent._bubbleReferences.add(targetReference);
+            clonedEvent._bubbleReferences.add(targetReference);
 
-	        (targetBubbleProvider as FLEventStreamProvider).dispatch(clonedEvent);
-				}
+            (targetBubbleProvider as FLEventStreamProvider).dispatch(clonedEvent);
+          }
+        }
       });
     }
   }

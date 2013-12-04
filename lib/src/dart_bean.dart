@@ -52,7 +52,9 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
 
   final Map<String, dynamic> _propertyValues = {};
 
-  final LinkedHashMap<String, BubblingTarget> _bubblingTargets;
+  final LinkedHashMap<String, BubblingTarget> _bubblingTargets; // TODO use _propertyValues instead
+
+  final Set<String> _bubbleTargetActivationCascadings;
 
   DiscriminatorStreams<PropertyChangedEvent> get
     onPropertyChangedEvents =>
@@ -68,7 +70,29 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
   Stream<PropertyChangedEvent> get onBubblePropertyChanged =>
 		onBubblePropertyChangedEvents.stream;
 
-  DartBean() : this._bubbleTargetingEnabled = false, this._bubblingTargets = new LinkedHashMap();
+  DartBean() :
+      this._bubbleTargetingEnabled = false,
+      this._bubblingTargets = new LinkedHashMap() ,
+      this._bubbleTargetActivationCascadings = new Set();
+
+  bool isBubbleTargetActivationCascading(String property) =>
+      _bubbleTargetActivationCascadings.contains(property);
+
+  void addBubbleTargetActivationCascading(String property) {
+    if (bubbleTargetingEnabled) {
+      throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
+    }
+
+    _bubbleTargetActivationCascadings.add(property);
+  }
+
+  void removeBubbleTargetActivationCascading(String property) {
+    if (bubbleTargetingEnabled) {
+      throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
+    }
+
+    _bubbleTargetActivationCascadings.remove(property);
+  }
 
   bool get bubbleTargetingEnabled => _bubbleTargetingEnabled;
 
@@ -77,6 +101,14 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
       this._bubbleTargetingEnabled = true;
 
       _bubblingTargets.forEach((bubblingId, bubblingTarget) {
+        if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(bubblingId)) {
+          if (bubblingTarget is DartBeanList && !bubblingTarget.isBubbleTargetActivationCascading) {
+            bubblingTarget.isBubbleTargetActivationCascading = true;
+          }
+
+          bubblingTarget.enableBubbleTargeting();
+        }
+
         bubblingTarget.addBubbleTarget(bubblingId, this);
       });
     }
@@ -87,7 +119,13 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
       this._bubbleTargetingEnabled = false;
 
       _bubblingTargets.keys.toList(growable: false).reversed.forEach((bubblingId) {
+        var bubblingTarget = _bubblingTargets[bubblingId];
+
         _bubblingTargets[bubblingId].removeBubbleTarget(bubblingId, this);
+
+        if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(bubblingId)) {
+          bubblingTarget.disableBubbleTargeting();
+        }
       });
     }
   }
@@ -139,6 +177,14 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
 
   void _addBubblingTarget(dynamic bubblingId, BubblingTarget bubblingTarget) {
     if (bubbleTargetingEnabled) {
+      if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(bubblingId)) {
+        if (bubblingTarget is DartBeanList && !bubblingTarget.isBubbleTargetActivationCascading) {
+          bubblingTarget.isBubbleTargetActivationCascading = true;
+        }
+
+        (bubblingTarget as ActivableBubbleTarget).enableBubbleTargeting();
+      }
+
       bubblingTarget.addBubbleTarget(bubblingId, this);
     }
 
@@ -150,6 +196,10 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
 
     if (bubbleTargetingEnabled) {
       bubblingTarget.removeBubbleTarget(bubblingId, this);
+
+      if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(bubblingId)) {
+        (bubblingTarget as ActivableBubbleTarget).disableBubbleTargeting();
+      }
     }
   }
 

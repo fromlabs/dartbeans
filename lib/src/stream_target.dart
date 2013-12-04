@@ -93,7 +93,7 @@ abstract class BaseTarget implements BubblingTarget {
   void addBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget) {
 		if (bubbleTarget is BaseTarget) {
 			_eventProvider.addBubbleTargetProvider(bubblingId, bubbleTarget._eventProvider);
-		} else if (bubbleTarget is EventTargetDelegator) {
+		} else if (bubbleTarget is EventTargetDelegator && bubbleTarget.delegateeTarget != null) {
 			addBubbleTarget(bubblingId, bubbleTarget.delegateeTarget);
 		} else {
 			throw new ArgumentError("Event target ${bubbleTarget.runtimeType} not supported for bubbling!");

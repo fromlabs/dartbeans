@@ -10,12 +10,18 @@ void main() {
   DartBean operation = new DartBean();
   DartBeanList operations = new DartBeanList();
   DartBean transaction = new DartBean();
+  transaction.addBubbleTargetActivationCascading("operations");
+
+  account.enableBubbleTargeting();
+
+  print(transaction.bubbleTargetingEnabled);
+  print(operations.bubbleTargetingEnabled);
+  print(operation.bubbleTargetingEnabled);
+  print(account.bubbleTargetingEnabled);
 
   transaction.onBubblePropertyChanged.listen((event) => print("Event on transaction: ${event.newValue}"));
 
   account["name"] = "Account1";
-
-  account.enableBubbleTargeting();
 
   account["name"] = "Account2";
 
@@ -29,16 +35,23 @@ void main() {
 
   account["name"] = "Account5";
 
-  operation.enableBubbleTargeting(); // TODO cascade
-  operations.enableBubbleTargeting(); // TODO cascade
   transaction.enableBubbleTargeting();
+
+  print(transaction.bubbleTargetingEnabled);
+  print(operations.bubbleTargetingEnabled);
+  print(operation.bubbleTargetingEnabled);
+  print(account.bubbleTargetingEnabled);
 
   account["name"] = "Account6";
 
   transaction.disableBubbleTargeting();
-  operations.disableBubbleTargeting();
-  operation.disableBubbleTargeting();
-  transaction = null;
+
+  print(transaction.bubbleTargetingEnabled);
+  print(operations.bubbleTargetingEnabled);
+  print(operation.bubbleTargetingEnabled);
+  print(account.bubbleTargetingEnabled);
 
   account["name"] = "Account7";
+
+  account.disableBubbleTargeting();
 }
