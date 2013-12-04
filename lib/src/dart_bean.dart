@@ -79,19 +79,23 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
       _bubbleTargetActivationCascadings.contains(property);
 
   void addBubbleTargetActivationCascading(String property) {
-    if (bubbleTargetingEnabled) {
-      throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
-    }
+    if (!isBubbleTargetActivationCascading(property)) {
+      if (bubbleTargetingEnabled) {
+        throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
+      }
 
-    _bubbleTargetActivationCascadings.add(property);
+      _bubbleTargetActivationCascadings.add(property);
+    }
   }
 
   void removeBubbleTargetActivationCascading(String property) {
-    if (bubbleTargetingEnabled) {
-      throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
-    }
+    if (isBubbleTargetActivationCascading(property)) {
+      if (bubbleTargetingEnabled) {
+        throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
+      }
 
-    _bubbleTargetActivationCascadings.remove(property);
+      _bubbleTargetActivationCascadings.remove(property);
+    }
   }
 
   bool get bubbleTargetingEnabled => _bubbleTargetingEnabled;
@@ -102,8 +106,8 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
 
       _bubblingTargets.forEach((bubblingId, bubblingTarget) {
         if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(bubblingId)) {
-          if (bubblingTarget is DartBeanList && !bubblingTarget.isBubbleTargetActivationCascading) {
-            bubblingTarget.isBubbleTargetActivationCascading = true;
+          if (bubblingTarget is DependantActivationBubbleTarget) {
+            bubblingTarget.addBubbleTargetActivationCascading(bubblingId);
           }
 
           bubblingTarget.enableBubbleTargeting();
@@ -178,8 +182,8 @@ class DartBean extends BaseTarget implements ActivableBubbleTarget {
   void _addBubblingTarget(dynamic bubblingId, BubblingTarget bubblingTarget) {
     if (bubbleTargetingEnabled) {
       if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(bubblingId)) {
-        if (bubblingTarget is DartBeanList && !bubblingTarget.isBubbleTargetActivationCascading) {
-          bubblingTarget.isBubbleTargetActivationCascading = true;
+        if (bubblingTarget is DependantActivationBubbleTarget) {
+          (bubblingTarget as DependantActivationBubbleTarget).addBubbleTargetActivationCascading(bubblingId);
         }
 
         (bubblingTarget as ActivableBubbleTarget).enableBubbleTargeting();

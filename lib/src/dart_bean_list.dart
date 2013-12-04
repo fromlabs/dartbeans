@@ -30,14 +30,27 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
   EventTargetDelegatee get delegateeTarget => _delegateeTarget;
 
-  bool get isBubbleTargetActivationCascading => _bubbleTargetActivationCascading;
+  bool isBubbleTargetActivationCascading(int index) =>
+      _bubbleTargetActivationCascading;
 
-  void set isBubbleTargetActivationCascading(bubbleTargetActivationCascading) {
-    if (bubbleTargetingEnabled) {
-      throw new StateError("Can't change bubble target activation cascading descriptor when the bean is is enabled for bubble targeting!");
+  void addBubbleTargetActivationCascading(int index) {
+    if (!isBubbleTargetActivationCascading(index)) {
+      if (bubbleTargetingEnabled) {
+        throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
+      }
+
+      _bubbleTargetActivationCascading = true;
     }
+  }
 
-    _bubbleTargetActivationCascading = bubbleTargetActivationCascading;
+  void removeBubbleTargetActivationCascading(int index) {
+    if (isBubbleTargetActivationCascading(index)) {
+      if (bubbleTargetingEnabled) {
+        throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
+      }
+
+      _bubbleTargetActivationCascading = false;
+    }
   }
 
   bool get bubbleTargetingEnabled => _delegateeTarget.bubbleTargetingEnabled;
@@ -48,9 +61,9 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
       int index = 0;
       _backingList.forEach((bubblingTarget) {
-        if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading) {
-          if (bubblingTarget is DartBeanList && !bubblingTarget.isBubbleTargetActivationCascading) {
-            bubblingTarget.isBubbleTargetActivationCascading = true;
+        if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(index)) {
+          if (bubblingTarget is DependantActivationBubbleTarget) {
+            bubblingTarget.addBubbleTargetActivationCascading(index);
           }
 
           bubblingTarget.enableBubbleTargeting();
@@ -69,7 +82,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
       _backingList.reversed.forEach((bubblingTarget) {
         bubblingTarget.removeBubbleTarget(--index, this);
 
-        if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading) {
+        if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(index)) {
           bubblingTarget.disableBubbleTargeting();
         }
       });
@@ -173,25 +186,25 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 		}
 	}
 
-  void _addBubblingTarget(int bubblingId, BubblingTarget bubblingTarget) {
+  void _addBubblingTarget(int index, BubblingTarget bubblingTarget) {
     if (bubbleTargetingEnabled) {
-      if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading) {
-        if (bubblingTarget is DartBeanList && !bubblingTarget.isBubbleTargetActivationCascading) {
-          bubblingTarget.isBubbleTargetActivationCascading = true;
+      if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(index)) {
+        if (bubblingTarget is DependantActivationBubbleTarget) {
+          (bubblingTarget as DependantActivationBubbleTarget).addBubbleTargetActivationCascading(index);
         }
 
         (bubblingTarget as ActivableBubbleTarget).enableBubbleTargeting();
       }
 
-      bubblingTarget.addBubbleTarget(bubblingId, this);
+      bubblingTarget.addBubbleTarget(index, this);
     }
   }
 
-  void _removeBubblingTarget(int bubblingId, BubblingTarget bubblingTarget) {
+  void _removeBubblingTarget(int index, BubblingTarget bubblingTarget) {
     if (bubbleTargetingEnabled) {
-      bubblingTarget.removeBubbleTarget(bubblingId, this);
+      bubblingTarget.removeBubbleTarget(index, this);
 
-      if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading) {
+      if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(index)) {
         (bubblingTarget as ActivableBubbleTarget).disableBubbleTargeting();
       }
     }

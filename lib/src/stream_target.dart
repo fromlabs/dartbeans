@@ -8,6 +8,14 @@ part of dartbeans;
 /// Interface used by types that are targets for event notification.
 abstract class FLEventTarget {}
 
+/// Interface used by types that bubble events to parent targets.
+abstract class BubblingTarget implements FLEventTarget {
+
+  void addBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget);
+
+  void removeBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget);
+}
+
 ///
 abstract class ActivableBubbleTarget implements FLEventTarget {
 
@@ -16,15 +24,16 @@ abstract class ActivableBubbleTarget implements FLEventTarget {
   void enableBubbleTargeting();
 
   void disableBubbleTargeting();
+
+  bool isBubbleTargetActivationCascading(dynamic bubblingId);
+
+  void addBubbleTargetActivationCascading(dynamic bubblingId);
+
+  void removeBubbleTargetActivationCascading(dynamic bubblingId);
 }
 
-/// Interface used by types that bubble events to parent targets.
-abstract class BubblingTarget implements FLEventTarget {
-
-	void addBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget);
-
-	void removeBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget);
-}
+///
+abstract class DependantActivationBubbleTarget implements ActivableBubbleTarget {}
 
 /// Interface used by types that proxy targets for event notification.
 abstract class EventTargetDelegatee implements FLEventTarget {
