@@ -28,8 +28,6 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
   EventTargetDelegatee get delegateeTarget => _delegateeTarget;
 
-
-
   ToRouteStreams get onBubbleEvents => _delegateeTarget.onBubbleEvents;
 
   DiscriminatorStreams<PropertyChangedEvent> get onBubblePropertyChangedEvents => _delegateeTarget.onBubblePropertyChangedEvents;
