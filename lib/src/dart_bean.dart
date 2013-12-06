@@ -46,7 +46,68 @@ class DartBeanProxy extends DartBean
   EventTargetDelegatee get delegateeTarget => _delegatorTarget != null ? null : this;
 }
 
-class DartBean extends BaseTarget implements ActivableBubbleTarget {
+abstract class DartBeanTarget implements BubblingTarget, ActivableBubbleTarget {
+
+  ToRouteStreams get onEvents;
+
+  ToRouteStreams get onBubbleEvents;
+
+  ToDiscriminateStreams get onToDiscriminateEvents;
+
+  ToDiscriminateStreams get onBubbleToDiscriminateEvents;
+
+  DiscriminatorStreams<PropertyChangedEvent> get onPropertyChangedEvents;
+
+  DiscriminatorStreams<PropertyChangedEvent> get onBubblePropertyChangedEvents;
+
+  Stream<FLEvent> get onEventDispatched;
+
+  Stream<PropertyChangedEvent> get onPropertyChanged;
+
+  Stream<FLEvent> get onBubbleEventDispatched;
+
+  Stream<PropertyChangedEvent> get onBubblePropertyChanged;
+
+  FLEventTarget get target;
+
+  void dispatch(String eventType, [FLEvent event]);
+
+  void discriminatedDispatch(String eventType, discriminator, DiscriminatedEvent event);
+
+  void dispatchPropertyChanged(property, PropertyChangedEvent event);
+
+  getPropertyValue(String property);
+
+  bool setPropertyValue(String property, value, {bool forceUpdate: false, void onPreDispatching(PropertyChangedEvent event), void onPostDispatched(PropertyChangedEvent event)});
+
+  void addBubbleTarget(bubblingId, FLEventTarget bubbleTarget);
+
+  void removeBubbleTarget(bubblingId, FLEventTarget bubbleTarget);
+
+  bool get bubbleTargetingEnabled;
+
+  void enableBubbleTargeting();
+
+  void disableBubbleTargeting();
+
+  bool isBubbleTargetActivationCascading(bubblingId);
+
+  void addBubbleTargetActivationCascading(bubblingId);
+
+  void removeBubbleTargetActivationCascading(bubblingId);
+
+  ListenerBinder bindListener(void onData(event));
+
+  ActionBinder bindAction(void execute());
+
+  ActionBinder bindActionAndRun(void execute());
+
+  PropertyCalculationBinder bindCalculatedProperty(String targetProperty, calculate());
+
+  PropertyProxionBinder bindProxiedProperty(source, String sourceProperty, {target, targetProperty});
+}
+
+class DartBean extends BaseTarget implements DartBeanTarget {
 
   bool _bubbleTargetingEnabled;
 

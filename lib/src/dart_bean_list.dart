@@ -6,7 +6,7 @@
 part of dartbeans;
 
 class DartBeanList<E extends DartBean> extends ListBase<E>
-    implements BubblingTarget, ActivableBubbleTarget, EventTargetDelegator, List<E> {
+    implements DartBeanTarget, EventTargetDelegator {
 
 	Stream<FLEvent> get onEventDispatched => _delegateeTarget.onEventDispatched;
 
@@ -22,18 +22,65 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
   DartBeanProxy _delegateeTarget;
 
-  DartBeanList({bubbleTargetActivationCascading: false}) :
-      _backingList = new List<E>(),
-      this._bubbleTargetActivationCascading = bubbleTargetActivationCascading {
+  DartBeanList({bubbleTargetActivationCascading: false}) : _backingList = new List<E>(), _bubbleTargetActivationCascading = bubbleTargetActivationCascading {
     _delegateeTarget = new DartBeanProxy(this);
   }
 
   EventTargetDelegatee get delegateeTarget => _delegateeTarget;
 
-  bool isBubbleTargetActivationCascading(int index) =>
+
+
+  ToRouteStreams get onBubbleEvents => _delegateeTarget.onBubbleEvents;
+
+  DiscriminatorStreams<PropertyChangedEvent> get onBubblePropertyChangedEvents => _delegateeTarget.onBubblePropertyChangedEvents;
+
+  ToDiscriminateStreams get onBubbleToDiscriminateEvents => _delegateeTarget.onBubbleToDiscriminateEvents;
+
+  ToRouteStreams get onEvents => _delegateeTarget.onEvents;
+
+  DiscriminatorStreams<PropertyChangedEvent> get onPropertyChangedEvents => _delegateeTarget.onPropertyChangedEvents;
+
+  ToDiscriminateStreams get onToDiscriminateEvents => _delegateeTarget.onToDiscriminateEvents;
+
+  FLEventTarget get target => _delegateeTarget.target;
+
+  void dispatch(String eventType, [FLEvent event]) {
+    _delegateeTarget.dispatch(eventType, event);
+  }
+
+  void discriminatedDispatch(String eventType, discriminator, DiscriminatedEvent event) {
+    _delegateeTarget.discriminatedDispatch(eventType, discriminator, event);
+  }
+
+  void dispatchPropertyChanged(property, PropertyChangedEvent event) {
+    _delegateeTarget.dispatchPropertyChanged(property, event);
+  }
+
+  ListenerBinder bindListener(void onData(event)) =>
+      _delegateeTarget.bindListener(onData);
+
+  ActionBinder bindAction(void execute()) =>
+      _delegateeTarget.bindAction(execute);
+
+  ActionBinder bindActionAndRun(void execute()) =>
+      _delegateeTarget.bindActionAndRun(execute);
+
+  PropertyCalculationBinder bindCalculatedProperty(String targetProperty, calculate()) =>
+      _delegateeTarget.bindCalculatedProperty(targetProperty, calculate);
+
+  PropertyProxionBinder bindProxiedProperty(source, String sourceProperty, {target, targetProperty}) =>
+      _delegateeTarget.bindProxiedProperty(source, sourceProperty, target: target, targetProperty: targetProperty);
+
+  getPropertyValue(String property) =>
+      _delegateeTarget.getPropertyValue(property);
+
+  bool setPropertyValue(String property, value, {bool forceUpdate: false, void onPreDispatching(PropertyChangedEvent event), void onPostDispatched(PropertyChangedEvent event)}) =>
+      setPropertyValue(property, value, forceUpdate: forceUpdate, onPreDispatching: onPreDispatching, onPostDispatched: onPostDispatched);
+
+  bool isBubbleTargetActivationCascading(index) =>
       _bubbleTargetActivationCascading;
 
-  void addBubbleTargetActivationCascading(int index) {
+  void addBubbleTargetActivationCascading(index) {
     if (!isBubbleTargetActivationCascading(index)) {
       if (bubbleTargetingEnabled) {
         throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
@@ -43,7 +90,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
     }
   }
 
-  void removeBubbleTargetActivationCascading(int index) {
+  void removeBubbleTargetActivationCascading(index) {
     if (isBubbleTargetActivationCascading(index)) {
       if (bubbleTargetingEnabled) {
         throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
