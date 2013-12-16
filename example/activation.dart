@@ -14,12 +14,9 @@ void main() {
 
   account.enableBubbleTargeting();
 
-  print(transaction.bubbleTargetingEnabled);
-  print(operations.bubbleTargetingEnabled);
-  print(operation.bubbleTargetingEnabled);
-  print(account.bubbleTargetingEnabled);
-
-  transaction.onBubblePropertyChanged.listen((event) => print("Event on transaction: ${event.newValue}"));
+  transaction.onBubblePropertyChanged.listen((event) {
+    print("Event on transaction: ${event.type} ${event.property}.${event.bubblingId}=${event.newValue}");
+  });
 
   account["name"] = "Account1";
 
@@ -37,19 +34,15 @@ void main() {
 
   transaction.enableBubbleTargeting();
 
-  print(transaction.bubbleTargetingEnabled);
-  print(operations.bubbleTargetingEnabled);
-  print(operation.bubbleTargetingEnabled);
-  print(account.bubbleTargetingEnabled);
-
   account["name"] = "Account6";
 
-  transaction.disableBubbleTargeting();
+  operations.add(operation);
 
-  print(transaction.bubbleTargetingEnabled);
-  print(operations.bubbleTargetingEnabled);
-  print(operation.bubbleTargetingEnabled);
-  print(account.bubbleTargetingEnabled);
+  operations.removeAt(1);
+
+  operations.removeAt(0);
+
+  transaction.disableBubbleTargeting();
 
   account["name"] = "Account7";
 

@@ -83,12 +83,20 @@ abstract class BaseTarget implements BubblingTarget {
 
   FLEventTarget get target => this;
 
+  void onPreDispatching(FLEvent event) {}
+
+  void onPostDispatched(FLEvent event) {}
+
   void dispatch(String eventType, [FLEvent event]) {
 		if (event == null) {
 			event = new FLEvent();
 		}
 
+		onPreDispatching(event);
+
     _eventProvider[eventType].dispatch(event);
+
+    onPostDispatched(event);
   }
 
   void discriminatedDispatch(String eventType, dynamic discriminator, DiscriminatedEvent event) {
@@ -96,7 +104,11 @@ abstract class BaseTarget implements BubblingTarget {
 			event = new DiscriminatedEvent();
 		}
 
+		onPreDispatching(event);
+
     (_eventProvider[eventType] as ToDiscriminateEventStreamProvider)[discriminator].dispatch(event);
+
+    onPostDispatched(event);
   }
 
   void addBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget) {

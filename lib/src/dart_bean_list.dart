@@ -6,7 +6,12 @@
 part of dartbeans;
 
 class DartBeanList<E extends DartBean> extends ListBase<E>
-    implements DartBeanTarget, EventTargetDelegator {
+    implements DartBeanTarget, DependantActivationBubbleTarget, EventTargetDelegator {
+
+  // property names
+  static const LENGTH = "_length";
+
+  static const EMPTY = "_empty";
 
 	Stream<FLEvent> get onEventDispatched => _delegateeTarget.onEventDispatched;
 
@@ -15,6 +20,18 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
   Stream<PropertyChangedEvent> get onPropertyChanged => _delegateeTarget.onPropertyChanged;
 
   Stream<PropertyChangedEvent> get onBubblePropertyChanged => _delegateeTarget.onBubblePropertyChanged;
+
+  Stream<PropertyChangedEvent> get onLengthChanged =>
+      onPropertyChangedEvents[LENGTH];
+
+  Stream<PropertyChangedEvent> get onEmptyChanged =>
+      onPropertyChangedEvents[EMPTY];
+
+  Stream<PropertyChangedEvent> get onBubbleLengthChanged =>
+      onBubblePropertyChangedEvents[LENGTH];
+
+  Stream<PropertyChangedEvent> get onBubbleEmptyChanged =>
+      onBubblePropertyChangedEvents[EMPTY];
 
   final List<E> _backingList;
 
@@ -42,16 +59,37 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
   FLEventTarget get target => _delegateeTarget.target;
 
+  void onPreDispatching(FLEvent event) {}
+
+  void onPostDispatched(FLEvent event) {}
+
   void dispatch(String eventType, [FLEvent event]) {
+    if (event == null) {
+      event = new FLEvent();
+    }
+
+    onPreDispatching(event);
+
     _delegateeTarget.dispatch(eventType, event);
+
+    onPostDispatched(event);
   }
 
   void discriminatedDispatch(String eventType, discriminator, DiscriminatedEvent event) {
+    if (event == null) {
+      event = new DiscriminatedEvent();
+    }
+
+    onPreDispatching(event);
+
     _delegateeTarget.discriminatedDispatch(eventType, discriminator, event);
+
+    onPostDispatched(event);
   }
 
-  void dispatchPropertyChanged(property, PropertyChangedEvent event) {
-    _delegateeTarget.dispatchPropertyChanged(property, event);
+  void dispatchPropertyChanged(dynamic property,
+      PropertyChangedEvent event) {
+    discriminatedDispatch(PropertyChangedEvent.EVENT_TYPE, property, event);
   }
 
   ListenerBinder bindListener(void onData(event)) =>
@@ -167,6 +205,11 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
     if (onPostDispatched != null) {
 			onPostDispatched(event);
     }
+
+    _delegateeTarget.dispatchPropertyChanged(LENGTH, new PropertyChangedEvent(length, length - 1));
+    if (length == 1) {
+      _delegateeTarget.dispatchPropertyChanged(EMPTY, new PropertyChangedEvent(false, true));
+    }
 	}
 
 	void updatePropertyValue(int index, E value,
@@ -227,6 +270,11 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
 	    if (onPostDispatched != null) {
 				onPostDispatched(event);
+	    }
+
+	    _delegateeTarget.dispatchPropertyChanged(LENGTH, new PropertyChangedEvent(length, length + 1));
+	    if (length == 0) {
+	      _delegateeTarget.dispatchPropertyChanged(EMPTY, new PropertyChangedEvent(true, false));
 	    }
 		}
 	}
