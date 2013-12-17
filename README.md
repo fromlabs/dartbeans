@@ -3,7 +3,7 @@
 DartBeans
 ===
 
-A Dart library that helps working with event streams.
+A Dart library that helps working with beans and event streams.
 
 To know something more about the released version have a look at the
 [CHANGELOG][changelog].
