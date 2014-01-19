@@ -5,6 +5,13 @@
 
 part of dartbeans;
 
+abstract class PropertyHandlingTarget {
+
+  void onPropertyChangingInternal(property, newValue, oldValue, bool adding, bool removing);
+
+  void onPropertyChangedInternal(property, newValue, oldValue, bool added, bool removed);
+}
+
 class PropertyChangedEvent extends DiscriminatedEvent {
 
   static const String EVENT_TYPE = "propertyChanged.";
@@ -46,7 +53,7 @@ class DartBeanProxy extends DartBean
   EventTargetDelegatee get delegateeTarget => _delegatorTarget != null ? null : this;
 }
 
-abstract class DartBeanTarget implements BubblingTarget, ActivableBubbleTarget {
+abstract class DartBeanTarget implements FLEventTarget, BubblingTarget, ActivableBubbleTarget {
 
   ToRouteStreams get onEvents;
 
@@ -78,23 +85,7 @@ abstract class DartBeanTarget implements BubblingTarget, ActivableBubbleTarget {
 
   getPropertyValue(String property);
 
-  bool setPropertyValue(String property, value, {bool forceUpdate: false, void onPreDispatching(PropertyChangedEvent event), void onPostDispatched(PropertyChangedEvent event)});
-
-  void addBubbleTarget(bubblingId, FLEventTarget bubbleTarget);
-
-  void removeBubbleTarget(bubblingId, FLEventTarget bubbleTarget);
-
-  bool get bubbleTargetingEnabled;
-
-  void enableBubbleTargeting();
-
-  void disableBubbleTargeting();
-
-  bool isBubbleTargetActivationCascading(bubblingId);
-
-  void addBubbleTargetActivationCascading(bubblingId);
-
-  void removeBubbleTargetActivationCascading(bubblingId);
+  bool setPropertyValue(String property, value, {bool forceUpdate: false});
 
   ListenerBinder bindListener(void onData(event));
 
@@ -168,7 +159,7 @@ class DartBean extends BaseTarget implements DartBeanTarget {
       _bubblingTargets.forEach((bubblingId, bubblingTarget) {
         if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(bubblingId)) {
           if (bubblingTarget is DependantActivationBubbleTarget) {
-            bubblingTarget.addBubbleTargetActivationCascading(bubblingId);
+            bubblingTarget.enableDependantActivation();
           }
 
           bubblingTarget.enableBubbleTargeting();
@@ -190,6 +181,10 @@ class DartBean extends BaseTarget implements DartBeanTarget {
 
         if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(bubblingId)) {
           bubblingTarget.disableBubbleTargeting();
+
+          if (bubblingTarget is DependantActivationBubbleTarget) {
+            bubblingTarget.disableDependantActivation();
+          }
         }
       });
     }
@@ -204,34 +199,29 @@ class DartBean extends BaseTarget implements DartBeanTarget {
   getPropertyValue(String property) =>
       _propertyValues[property];
 
-  bool setPropertyValue(String property, var value,
-      {bool forceUpdate: false,
-        void onPreDispatching(PropertyChangedEvent event),
-          void onPostDispatched(PropertyChangedEvent event)}) {
+  bool setPropertyValue(String property, value, {bool forceUpdate: false}) {
 		var exist = _propertyValues.containsKey(property);
     var old = exist ? _propertyValues[property] : null;
     if(forceUpdate || value != old) {
-			if (old is BubblingTarget) {
-				_removeBubblingTarget(property, old);
-			}
+      if (old is BubblingTarget) {
+        _removeBubblingTarget(property, old);
+      }
+
+      if (this is PropertyHandlingTarget) {
+        (this as PropertyHandlingTarget).onPropertyChangingInternal(property, value, old, false, false);
+      }
 
       _propertyValues[property] = value;
 
-			if (value is BubblingTarget) {
-			  _addBubblingTarget(property, value);
-			}
-
-      PropertyChangedEvent event = exist ? new PropertyChangedEvent(value, old)
-					: new PropertyChangedEvent.createAdded(value);
-
-      if (onPreDispatching != null) {
-        onPreDispatching(event);
+      if (this is PropertyHandlingTarget) {
+        (this as PropertyHandlingTarget).onPropertyChangedInternal(property, value, old, false, false);
       }
 
-      dispatchPropertyChanged(property, event);
+      dispatchPropertyChanged(property, exist ? new PropertyChangedEvent(value, old)
+      : new PropertyChangedEvent.createAdded(value));
 
-      if (onPostDispatched != null) {
-        onPostDispatched(event);
+      if (value is BubblingTarget) {
+        _addBubblingTarget(property, value);
       }
 
       return true;
@@ -244,7 +234,7 @@ class DartBean extends BaseTarget implements DartBeanTarget {
     if (bubbleTargetingEnabled) {
       if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(bubblingId)) {
         if (bubblingTarget is DependantActivationBubbleTarget) {
-          (bubblingTarget as DependantActivationBubbleTarget).addBubbleTargetActivationCascading(bubblingId);
+          (bubblingTarget as DependantActivationBubbleTarget).enableDependantActivation();
         }
 
         (bubblingTarget as ActivableBubbleTarget).enableBubbleTargeting();
@@ -264,12 +254,15 @@ class DartBean extends BaseTarget implements DartBeanTarget {
 
       if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(bubblingId)) {
         (bubblingTarget as ActivableBubbleTarget).disableBubbleTargeting();
+
+        if (bubblingTarget is DependantActivationBubbleTarget) {
+          (bubblingTarget as DependantActivationBubbleTarget).disableDependantActivation();
+        }
       }
     }
   }
 
-  void dispatchPropertyChanged(dynamic property,
-      PropertyChangedEvent event) {
+  void dispatchPropertyChanged(dynamic property, PropertyChangedEvent event) {
     discriminatedDispatch(PropertyChangedEvent.EVENT_TYPE, property, event);
   }
 

@@ -12,7 +12,9 @@ class FLEvent {
 
 	String _type;
 
-	List<BubbleTargetReference> _bubbleReferences;
+	final List<BubbleTargetReference> _bubbleReferences;
+
+	FLEvent() : _bubbleReferences = [];
 
   /// Returns the type of the event.
   String get type => _type;

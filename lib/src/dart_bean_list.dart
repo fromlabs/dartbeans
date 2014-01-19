@@ -110,30 +110,28 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
   getPropertyValue(String property) =>
       _delegateeTarget.getPropertyValue(property);
 
-  bool setPropertyValue(String property, value, {bool forceUpdate: false, void onPreDispatching(PropertyChangedEvent event), void onPostDispatched(PropertyChangedEvent event)}) =>
-      setPropertyValue(property, value, forceUpdate: forceUpdate, onPreDispatching: onPreDispatching, onPostDispatched: onPostDispatched);
+  bool setPropertyValue(String property, var value, {bool forceUpdate: false}) =>
+      _delegateeTarget.setPropertyValue(property, value, forceUpdate: forceUpdate);
+
+  bool get dependantActivationEnabled => _bubbleTargetActivationCascading;
+
+  void enableDependantActivation() {
+    _bubbleTargetActivationCascading = true;
+  }
+
+  void disableDependantActivation() {
+    _bubbleTargetActivationCascading = false;
+  }
 
   bool isBubbleTargetActivationCascading(index) =>
-      _bubbleTargetActivationCascading;
+      dependantActivationEnabled;
 
   void addBubbleTargetActivationCascading(index) {
-    if (!isBubbleTargetActivationCascading(index)) {
-      if (bubbleTargetingEnabled) {
-        throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
-      }
-
-      _bubbleTargetActivationCascading = true;
-    }
+    throw new UnsupportedError("Dependant activation cascading");
   }
 
   void removeBubbleTargetActivationCascading(index) {
-    if (isBubbleTargetActivationCascading(index)) {
-      if (bubbleTargetingEnabled) {
-        throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
-      }
-
-      _bubbleTargetActivationCascading = false;
-    }
+    throw new UnsupportedError("Dependant activation cascading");
   }
 
   bool get bubbleTargetingEnabled => _delegateeTarget.bubbleTargetingEnabled;
@@ -146,7 +144,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
       _backingList.forEach((bubblingTarget) {
         if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(index)) {
           if (bubblingTarget is DependantActivationBubbleTarget) {
-            bubblingTarget.addBubbleTargetActivationCascading(index);
+            bubblingTarget.enableDependantActivation();
           }
 
           bubblingTarget.enableBubbleTargeting();
@@ -167,6 +165,10 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
         if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(index)) {
           bubblingTarget.disableBubbleTargeting();
+
+          if (bubblingTarget is DependantActivationBubbleTarget) {
+            bubblingTarget.disableDependantActivation();
+          }
         }
       });
     }
@@ -180,110 +182,109 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
     _delegateeTarget.removeBubbleTarget(bubblingId, bubbleTarget);
   }
 
-	void addPropertyValue(int index, E value,
-			{void onPreDispatching(PropertyChangedEvent event),
-	  			void onPostDispatched(PropertyChangedEvent event),
-				bool adjustBubblingIds: true}) {
-		if (value is BubblingTarget) {
-			_addBubblingTarget(index, value);
-		}
+	void addPropertyValue(int index, E value, {bool adjustBubblingIds: true}) {
+    if (this is PropertyHandlingTarget) {
+      (this as PropertyHandlingTarget).onPropertyChangingInternal(index, value, null, true, false);
+      (this as PropertyHandlingTarget).onPropertyChangingInternal(LENGTH, length + 1, length, false, false);
+      if (length == 0) {
+        (this as PropertyHandlingTarget).onPropertyChangingInternal(EMPTY, false, true, false, false);
+      }
+    }
 
 		_backingList.insert(index, value);
 
-		if (adjustBubblingIds) {
-			_adjustBubblingIds(index, 1);
-		}
-
-		PropertyChangedEvent event = new PropertyChangedEvent.createAdded(value);
-
-    if (onPreDispatching != null) {
-    		onPreDispatching(event);
+		if (this is PropertyHandlingTarget) {
+      (this as PropertyHandlingTarget).onPropertyChangedInternal(index, value, null, true, false);
+      (this as PropertyHandlingTarget).onPropertyChangedInternal(LENGTH, length, length - 1, false, false);
+      if (length == 1) {
+        (this as PropertyHandlingTarget).onPropertyChangedInternal(EMPTY, false, true, false, false);
+      }
     }
 
-    _delegateeTarget.dispatchPropertyChanged(index, event);
-
-    if (onPostDispatched != null) {
-			onPostDispatched(event);
-    }
+    _delegateeTarget.dispatchPropertyChanged(index, new PropertyChangedEvent.createAdded(value));
 
     _delegateeTarget.dispatchPropertyChanged(LENGTH, new PropertyChangedEvent(length, length - 1));
     if (length == 1) {
       _delegateeTarget.dispatchPropertyChanged(EMPTY, new PropertyChangedEvent(false, true));
     }
+
+    if (value is BubblingTarget) {
+      _addBubblingTarget(index, value);
+
+      if (adjustBubblingIds) {
+        _adjustBubblingIds(index, 1);
+      }
+    }
 	}
 
-	void updatePropertyValue(int index, E value,
-			{bool forceUpdate: false,
-	  			void onPreDispatching(PropertyChangedEvent event),
-	  				void onPostDispatched(PropertyChangedEvent event)}) {
-
+	void updatePropertyValue(int index, E value, {bool forceUpdate: false}) {
 		var previous = _backingList[index];
 
 		if(forceUpdate || value != previous) {
-			if (previous is BubblingTarget) {
-				_removeBubblingTarget(index, previous);
-			}
+      if (previous is BubblingTarget) {
+        _removeBubblingTarget(index, previous);
+      }
 
-		  _backingList[index] = value;
+      if (this is PropertyHandlingTarget) {
+        (this as PropertyHandlingTarget).onPropertyChangingInternal(index, value, previous, false, false);
+      }
 
-			if (value is BubblingTarget) {
-				_addBubblingTarget(index, value);
-			}
+      _backingList[index] = value;
 
-			PropertyChangedEvent event = new PropertyChangedEvent(value, previous);
+      if (this is PropertyHandlingTarget) {
+        (this as PropertyHandlingTarget).onPropertyChangedInternal(index, value, previous, false, false);
+      }
 
-	    if (onPreDispatching != null) {
-  				onPreDispatching(event);
-	    }
+	    _delegateeTarget.dispatchPropertyChanged(index, new PropertyChangedEvent(value, previous));
 
-	    _delegateeTarget.dispatchPropertyChanged(index, event);
-
-	    if (onPostDispatched != null) {
-				onPostDispatched(event);
-	    }
+      if (value is BubblingTarget) {
+        _addBubblingTarget(index, value);
+      }
 		}
 	}
 
-	bool removePropertyValue(int index,
-			{void onPreDispatching(PropertyChangedEvent event),
-	  			void onPostDispatched(PropertyChangedEvent event),
-					bool adjustBubblingIds: true}) {
-		var removed = _backingList.removeAt(index);
+	bool removePropertyValue(int index, {bool adjustBubblingIds: true}) {
+	  var old = _backingList[index];
+	  if (old is BubblingTarget) {
+      _removeBubblingTarget(index, old);
 
-		if (removed != null) {
-			if (removed is BubblingTarget) {
-				_removeBubblingTarget(index, removed);
-			}
+      // adjust next bubblingIds
+      if (adjustBubblingIds) {
+        _adjustBubblingIds(index, -1);
+      }
+    }
 
-			// adjust next bubblingIds
-			if (adjustBubblingIds) {
-				_adjustBubblingIds(index, -1);
-			}
+	  if (this is PropertyHandlingTarget) {
+      (this as PropertyHandlingTarget).onPropertyChangingInternal(index, null, old, false, true);
+      (this as PropertyHandlingTarget).onPropertyChangingInternal(LENGTH, length - 1, length, false, false);
+      if (length == 1) {
+        (this as PropertyHandlingTarget).onPropertyChangingInternal(EMPTY, true, false, false, false);
+      }
+    }
 
-			PropertyChangedEvent event = new PropertyChangedEvent.createRemoved(removed);
+		_backingList.removeAt(index);
 
-	    if (onPreDispatching != null) {
-	    		onPreDispatching(event);
-	    }
+		if (this is PropertyHandlingTarget) {
+      (this as PropertyHandlingTarget).onPropertyChangedInternal(index, null, old, false, true);
+      (this as PropertyHandlingTarget).onPropertyChangedInternal(LENGTH, length, length + 1, false, false);
+      if (length == 0) {
+        (this as PropertyHandlingTarget).onPropertyChangedInternal(EMPTY, true, false, false, false);
+      }
+    }
 
-	    _delegateeTarget.dispatchPropertyChanged(index, event);
+    _delegateeTarget.dispatchPropertyChanged(index, new PropertyChangedEvent.createRemoved(old));
 
-	    if (onPostDispatched != null) {
-				onPostDispatched(event);
-	    }
-
-	    _delegateeTarget.dispatchPropertyChanged(LENGTH, new PropertyChangedEvent(length, length + 1));
-	    if (length == 0) {
-	      _delegateeTarget.dispatchPropertyChanged(EMPTY, new PropertyChangedEvent(true, false));
-	    }
-		}
+    _delegateeTarget.dispatchPropertyChanged(LENGTH, new PropertyChangedEvent(length, length + 1));
+    if (length == 0) {
+      _delegateeTarget.dispatchPropertyChanged(EMPTY, new PropertyChangedEvent(true, false));
+    }
 	}
 
   void _addBubblingTarget(int index, BubblingTarget bubblingTarget) {
     if (bubbleTargetingEnabled) {
       if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(index)) {
         if (bubblingTarget is DependantActivationBubbleTarget) {
-          (bubblingTarget as DependantActivationBubbleTarget).addBubbleTargetActivationCascading(index);
+          (bubblingTarget as DependantActivationBubbleTarget).enableDependantActivation();
         }
 
         (bubblingTarget as ActivableBubbleTarget).enableBubbleTargeting();
@@ -299,6 +300,10 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
       if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(index)) {
         (bubblingTarget as ActivableBubbleTarget).disableBubbleTargeting();
+
+        if (bubblingTarget is DependantActivationBubbleTarget) {
+          (bubblingTarget as DependantActivationBubbleTarget).disableDependantActivation();
+        }
       }
     }
   }
@@ -415,7 +420,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 	        i++;
 	      });
 	    } else {
-	      _backingList.sublist(fromIndex).forEach((nextElement) {
+	      _backingList.sublist(fromIndex - delta).forEach((nextElement) {
 	        if (nextElement is BubblingTarget) {
 	          nextElement.removeBubbleTarget(i - delta, this);
 	          nextElement.addBubbleTarget(i, this);

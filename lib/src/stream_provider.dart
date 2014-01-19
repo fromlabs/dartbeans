@@ -191,38 +191,35 @@ abstract class StreamProvider<T extends FLEvent> {
 
   void _dispatchBubbleEvent(FLEvent event,
       StreamProvider<T> _targetProvider) {
+
     // TODO check if bubbling for this event type is enabled here!
     if (_bubbleProviders != null) {
       _bubbleProviders.forEach((BubbleProviderReference reference) {
         var bubbleTarget = reference.bubbleProvider.target;
-        if (bubbleTarget is! ActivableBubbleTarget || bubbleTarget.bubbleTargetingEnabled) {
-          var targetReference = new BubbleTargetReference(reference.bubblingId, bubbleTarget);
-          if (!event._contains(targetReference)) {
-            var targetBubbleProvider =
-                _targetProvider._getBubbleProvider(reference.bubbleProvider);
+        var targetReference = new BubbleTargetReference(reference.bubblingId, bubbleTarget);
+        if (!event._contains(targetReference)) {
+          var targetBubbleProvider =
+              _targetProvider._getBubbleProvider(reference.bubbleProvider);
 
-            FLEvent clonedEvent = event.clone();
-            if (clonedEvent.runtimeType != event.runtimeType) {
-              throw new UnimplementedError("Implement clone method " +
-                  "${event.runtimeType}.clone()");
-            }
-
-            clonedEvent._target = event._target;
-            clonedEvent._bubbleReferences = new List.from(event._bubbleReferences);
-
-            clonedEvent._bubbleReferences.add(targetReference);
-
-            (targetBubbleProvider as FLEventStreamProvider).dispatch(clonedEvent);
+          FLEvent clonedEvent = event.clone();
+          if (clonedEvent.runtimeType != event.runtimeType) {
+            throw new UnimplementedError("Implement clone method " +
+                "${event.runtimeType}.clone()");
           }
+
+          clonedEvent._target = event._target;
+          clonedEvent._bubbleReferences.addAll(event._bubbleReferences);
+          clonedEvent._bubbleReferences.add(targetReference);
+
+          (targetBubbleProvider as FLEventStreamProvider).dispatch(clonedEvent);
         }
       });
     }
   }
 
   void _complete(FLEvent event) {
-    if (event._bubbleReferences == null) {
+    if (event._target == null) {
 			event._target = this.target;
-			event._bubbleReferences = [];
     }
   }
 
@@ -303,14 +300,28 @@ class FLEventStreamProvider<T extends FLEvent>
   }
 
   void dispatch(T event) {
-/*
-    if (target != null &&
-		    (target is! ActivableTarget || (target as ActivableTarget).dispatchingActive)) {
-*/
     if (target != null) {
 			_complete(event);
 
+			var realTarget = event.bubbled ? event.bubbleTarget : event.target;
+
+			if (target is EventHandlingTarget) {
+        (target as EventHandlingTarget).onPreDispatchingInternal(event);
+      }
+
+      if (target != realTarget && realTarget is EventHandlingTarget) {
+        realTarget.onPreDispatchingInternal(event);
+      }
+
 			_dispatchEvent(event, this);
+
+			if (target != realTarget && realTarget is EventHandlingTarget) {
+			 realTarget.onPostDispatchedInternal(event);
+			}
+
+			if (target is EventHandlingTarget) {
+			  (target as EventHandlingTarget).onPostDispatchedInternal(event);
+      }
 		}
   }
 
@@ -370,7 +381,7 @@ class ToDiscriminateEventStreamProvider<T extends DiscriminatedEvent>
           new DiscriminatedEventStreamProvider
             ._forHostProvider(_eventType, discriminator, this));
 
-  void dispatch(T event) {
+  void dispatch(T event, [void onPreDispatching(T event), void onPostDispatched(T event)]) {
     throw new UnsupportedError("Dispatch event from " +
       "host provider not allowed");
   }

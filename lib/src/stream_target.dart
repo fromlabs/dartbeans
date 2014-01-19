@@ -8,8 +8,16 @@ part of dartbeans;
 /// Interface used by types that are targets for event notification.
 abstract class FLEventTarget {}
 
+/// Interface used by types that handles pre and post event dispatching.
+abstract class EventHandlingTarget {
+
+  void onPreDispatchingInternal(FLEvent event);
+
+  void onPostDispatchedInternal(FLEvent event);
+}
+
 /// Interface used by types that bubble events to parent targets.
-abstract class BubblingTarget implements FLEventTarget {
+abstract class BubblingTarget {
 
   void addBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget);
 
@@ -17,7 +25,7 @@ abstract class BubblingTarget implements FLEventTarget {
 }
 
 ///
-abstract class ActivableBubbleTarget implements FLEventTarget {
+abstract class ActivableBubbleTarget {
 
   bool get bubbleTargetingEnabled;
 
@@ -33,15 +41,22 @@ abstract class ActivableBubbleTarget implements FLEventTarget {
 }
 
 ///
-abstract class DependantActivationBubbleTarget implements ActivableBubbleTarget {}
+abstract class DependantActivationBubbleTarget implements ActivableBubbleTarget {
+
+  bool get dependantActivationEnabled;
+
+  void enableDependantActivation();
+
+  void disableDependantActivation();
+}
 
 /// Interface used by types that proxy targets for event notification.
-abstract class EventTargetDelegatee implements FLEventTarget {
+abstract class EventTargetDelegatee extends FLEventTarget {
   /// The proxied target.
   EventTargetDelegator get delegatorTarget;
 }
 
-abstract class EventTargetDelegator implements FLEventTarget {
+abstract class EventTargetDelegator extends FLEventTarget {
   EventTargetDelegatee get delegateeTarget;
 }
 
@@ -57,7 +72,7 @@ class EventTargetProxy extends BaseTarget
   EventTargetDelegatee get delegateeTarget => _delegatorTarget != null ? null : this;
 }
 
-abstract class BaseTarget implements BubblingTarget {
+abstract class BaseTarget implements FLEventTarget, BubblingTarget {
 
   final ToRouteEventStreamProvider _eventProvider =
       new ToRouteEventStreamProvider();
@@ -83,20 +98,16 @@ abstract class BaseTarget implements BubblingTarget {
 
   FLEventTarget get target => this;
 
-  void onPreDispatching(FLEvent event) {}
+  // void onPreDispatchingInternal(FLEvent event) {}
 
-  void onPostDispatched(FLEvent event) {}
+  // void onPostDispatchedInternal(FLEvent event) {}
 
   void dispatch(String eventType, [FLEvent event]) {
 		if (event == null) {
 			event = new FLEvent();
 		}
 
-		onPreDispatching(event);
-
     _eventProvider[eventType].dispatch(event);
-
-    onPostDispatched(event);
   }
 
   void discriminatedDispatch(String eventType, dynamic discriminator, DiscriminatedEvent event) {
@@ -104,11 +115,7 @@ abstract class BaseTarget implements BubblingTarget {
 			event = new DiscriminatedEvent();
 		}
 
-		onPreDispatching(event);
-
     (_eventProvider[eventType] as ToDiscriminateEventStreamProvider)[discriminator].dispatch(event);
-
-    onPostDispatched(event);
   }
 
   void addBubbleTarget(dynamic bubblingId, FLEventTarget bubbleTarget) {
