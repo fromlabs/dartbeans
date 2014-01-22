@@ -98,10 +98,6 @@ abstract class BaseTarget implements FLEventTarget, BubblingTarget {
 
   FLEventTarget get target => this;
 
-  // void onPreDispatchingInternal(FLEvent event) {}
-
-  // void onPostDispatchedInternal(FLEvent event) {}
-
   void dispatch(String eventType, [FLEvent event]) {
 		if (event == null) {
 			event = new FLEvent();
