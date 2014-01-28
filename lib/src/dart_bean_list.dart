@@ -152,6 +152,8 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 
         bubblingTarget.addBubbleTarget(index++, this);
       });
+    } else {
+      throw new StateError("Bubble targeting already enabled");
     }
   }
 
@@ -171,6 +173,8 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
           }
         }
       });
+    } else {
+      throw new StateError("Bubble targeting already disabled");
     }
   }
 

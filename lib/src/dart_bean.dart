@@ -167,6 +167,8 @@ class DartBean extends BaseTarget implements DartBeanTarget {
 
         bubblingTarget.addBubbleTarget(bubblingId, this);
       });
+    } else {
+      throw new StateError("Bubble targeting already enabled");
     }
   }
 
@@ -187,6 +189,8 @@ class DartBean extends BaseTarget implements DartBeanTarget {
           }
         }
       });
+    } else {
+      throw new StateError("Bubble targeting already disabled");
     }
   }
 
