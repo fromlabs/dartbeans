@@ -133,7 +133,7 @@ class DartBean extends BaseTarget implements DartBeanTarget {
   void addBubbleTargetActivationCascading(String property) {
     if (!isBubbleTargetActivationCascading(property)) {
       if (bubbleTargetingEnabled) {
-        throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
+        throw new StateError("Can't change bubble target activation cascading descriptors when the bean is enabled for bubble targeting!");
       }
 
       _bubbleTargetActivationCascadings.add(property);
@@ -143,7 +143,7 @@ class DartBean extends BaseTarget implements DartBeanTarget {
   void removeBubbleTargetActivationCascading(String property) {
     if (isBubbleTargetActivationCascading(property)) {
       if (bubbleTargetingEnabled) {
-        throw new StateError("Can't change bubble target activation cascading descriptors when the bean is is enabled for bubble targeting!");
+        throw new StateError("Can't change bubble target activation cascading descriptors when the bean is enabled for bubble targeting!");
       }
 
       _bubbleTargetActivationCascadings.remove(property);
