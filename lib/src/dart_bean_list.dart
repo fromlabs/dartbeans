@@ -247,7 +247,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
 		}
 	}
 
-	bool removePropertyValue(int index, {bool adjustBubblingIds: true}) {
+	E removePropertyValue(int index, {bool adjustBubblingIds: true}) {
 	  var old = _backingList[index];
 	  if (old is BubblingTarget) {
       _removeBubblingTarget(index, old);
@@ -266,7 +266,7 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
       }
     }
 
-		_backingList.removeAt(index);
+		var removed = _backingList.removeAt(index);
 
 		if (this is PropertyHandlingTarget) {
       (this as PropertyHandlingTarget).onPropertyChangedInternal(index, null, old, false, true);
@@ -282,6 +282,8 @@ class DartBeanList<E extends DartBean> extends ListBase<E>
     if (length == 0) {
       _delegateeTarget.dispatchPropertyChanged(EMPTY, new PropertyChangedEvent(true, false));
     }
+
+    return removed;
 	}
 
   void _addBubblingTarget(int index, BubblingTarget bubblingTarget) {
