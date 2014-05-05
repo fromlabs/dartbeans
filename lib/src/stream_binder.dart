@@ -9,34 +9,51 @@ typedef void ActionExecution();
 
 typedef PropertyCalculation();
 
+class ListenerBinding {
+
+	var _key;
+
+	ListenerBinding(this._key);
+}
+
 class ListenerBinder {
 
-  List<StreamSubscription> _subscriptions = [];
+  Map<dynamic, StreamSubscription> _subscriptions = new LinkedHashMap();
 
   var _onData;
 
   ListenerBinder(this._onData);
 
-  void listen(Stream stream) {
+  ListenerBinding listen(Stream stream, [dynamic key]) {
     var subscription = stream.listen(_onData);
-    _subscriptions.add(subscription);
+    if (key == null) {
+		key = identityHashCode(subscription);
+    }
+    _subscriptions[key] = subscription;
+
+    return new ListenerBinding(key);
+  }
+
+  void unlisten(ListenerBinding listenerBinding) {
+		var subscription = _subscriptions.remove(listenerBinding._key);
+		subscription.cancel();
   }
 
   void listens(Iterable<Stream> streams) =>
       streams.forEach((stream) => listen(stream));
 
   void pause() {
-    this._subscriptions.forEach((subscription) =>
+    this._subscriptions.forEach((key, subscription) =>
         subscription.pause());
   }
 
   void resume() {
-    this._subscriptions.forEach((subscription) =>
+    this._subscriptions.forEach((key, subscription) =>
         subscription.resume());
   }
 
   void cancel() {
-    this._subscriptions.reversed.forEach((subscription) =>
+    new List.from(this._subscriptions.values).reversed.forEach((subscription) =>
         subscription.cancel());
     this._subscriptions.clear();
   }
