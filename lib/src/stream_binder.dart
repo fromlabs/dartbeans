@@ -39,8 +39,13 @@ class ListenerBinder {
 		subscription.cancel();
   }
 
-  void listens(Iterable<Stream> streams) =>
-      streams.forEach((stream) => listen(stream));
+  Iterable<ListenerBinding> listens(Iterable<Stream> streams) {
+  		var bindings = [];
+  		streams.forEach((stream) {
+  			bindings.add(listen(stream));
+  		});
+  		return bindings;
+  }
 
   void pause() {
     this._subscriptions.forEach((key, subscription) =>
