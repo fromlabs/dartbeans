@@ -18,7 +18,7 @@ class ListenerBinding {
 
 class ListenerBinder {
 
-  Map<dynamic, StreamSubscription> _subscriptions = new LinkedHashMap();
+  Map<dynamic, StreamSubscription> _subscriptions = {};
 
   var _onData;
 

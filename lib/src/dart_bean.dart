@@ -104,7 +104,7 @@ class DartBean extends BaseTarget implements DartBeanTarget {
 
   final Map<String, dynamic> _propertyValues = {};
 
-  final LinkedHashMap<String, BubblingTarget> _bubblingTargets; // TODO use _propertyValues instead
+  final Map<String, BubblingTarget> _bubblingTargets; // TODO use _propertyValues instead
 
   final Set<String> _bubbleTargetActivationCascadings;
 
@@ -124,7 +124,7 @@ class DartBean extends BaseTarget implements DartBeanTarget {
 
   DartBean() :
       this._bubbleTargetingEnabled = false,
-      this._bubblingTargets = new LinkedHashMap() ,
+      this._bubblingTargets = {} ,
       this._bubbleTargetActivationCascadings = new Set();
 
   bool isBubbleTargetActivationCascading(String property) =>
