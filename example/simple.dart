@@ -6,11 +6,9 @@
 import "package:dartbeans/dartbeans.dart";
 
 void main() {
-  DartBean person = new DartBean();
+	DartBean person = new DartBean();
 
-	person.onPropertyChangedEvents["name"]
-		.listen((PropertyChangedEvent event) =>
-			print("Changed: ${event.property} = ${event.newValue}"));
+	person.onPropertyChangedEvents["name"].listen((PropertyChangedEvent event) => print("Changed: ${event.property} = ${event.newValue}"));
 
 	person["name"] = "Hans";
 }

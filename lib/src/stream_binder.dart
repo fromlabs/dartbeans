@@ -18,66 +18,63 @@ class ListenerBinding {
 
 class ListenerBinder {
 
-  Map<dynamic, StreamSubscription> _subscriptions = {};
+	Map<dynamic, StreamSubscription> _subscriptions = {};
 
-  var _onData;
+	var _onData;
 
-  ListenerBinder(this._onData);
+	ListenerBinder(this._onData);
 
-  ListenerBinding listen(Stream stream, [dynamic key]) {
-    var subscription = stream.listen(_onData);
-    if (key == null) {
-		key = identityHashCode(subscription);
-    }
-    _subscriptions[key] = subscription;
+	ListenerBinding listen(Stream stream, [dynamic key]) {
+		var subscription = stream.listen(_onData);
+		if (key == null) {
+			key = identityHashCode(subscription);
+		}
+		_subscriptions[key] = subscription;
 
-    return new ListenerBinding(key);
-  }
+		return new ListenerBinding(key);
+	}
 
-  void unlisten(ListenerBinding listenerBinding) {
+	void unlisten(ListenerBinding listenerBinding) {
 		var subscription = _subscriptions.remove(listenerBinding._key);
 		subscription.cancel();
-  }
+	}
 
-  Iterable<ListenerBinding> listens(Iterable<Stream> streams) {
-  		var bindings = [];
-  		streams.forEach((stream) {
-  			bindings.add(listen(stream));
-  		});
-  		return bindings;
-  }
+	Iterable<ListenerBinding> listens(Iterable<Stream> streams) {
+		var bindings = [];
+		streams.forEach((stream) {
+			bindings.add(listen(stream));
+		});
+		return bindings;
+	}
 
-  void pause() {
-    this._subscriptions.forEach((key, subscription) =>
-        subscription.pause());
-  }
+	void pause() {
+		this._subscriptions.forEach((key, subscription) => subscription.pause());
+	}
 
-  void resume() {
-    this._subscriptions.forEach((key, subscription) =>
-        subscription.resume());
-  }
+	void resume() {
+		this._subscriptions.forEach((key, subscription) => subscription.resume());
+	}
 
-  void cancel() {
-    new List.from(this._subscriptions.values).reversed.forEach((subscription) =>
-        subscription.cancel());
-    this._subscriptions.clear();
-  }
+	void cancel() {
+		new List.from(this._subscriptions.values).reversed.forEach((subscription) => subscription.cancel());
+		this._subscriptions.clear();
+	}
 }
 
 class ActionBinder extends ListenerBinder {
 
-  ActionExecution _execute;
+	ActionExecution _execute;
 
-  ActionBinder(this._execute) : super(null) {
-    _onData = (event) => this._execute();
-  }
+	ActionBinder(this._execute) : super(null) {
+		_onData = (event) => this._execute();
+	}
 
-  ActionBinder.runImmediately(this._execute) : super(null) {
-    _onData = (event) => this._execute();
-    runNow();
-  }
+	ActionBinder.runImmediately(this._execute) : super(null) {
+		_onData = (event) => this._execute();
+		runNow();
+	}
 
-  void runNow() {
+	void runNow() {
 		_onData(null);
-  }
+	}
 }

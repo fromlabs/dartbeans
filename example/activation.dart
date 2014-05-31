@@ -6,45 +6,45 @@
 import "package:dartbeans/dartbeans.dart";
 
 void main() {
-  DartBean account = new DartBean();
-  DartBean operation = new DartBean();
-  DartBeanList operations = new DartBeanList();
-  DartBean transaction = new DartBean();
-  transaction.addBubbleTargetActivationCascading("operations");
+	DartBean account = new DartBean();
+	DartBean operation = new DartBean();
+	DartBeanList operations = new DartBeanList();
+	DartBean transaction = new DartBean();
+	transaction.addBubbleTargetActivationCascading("operations");
 
-  account.enableBubbleTargeting();
+	account.enableBubbleTargeting();
 
-  transaction.onBubblePropertyChanged.listen((event) {
-    print("Event on transaction: ${event.type} ${event.property}.${event.bubblingId}=${event.newValue}");
-  });
+	transaction.onBubblePropertyChanged.listen((event) {
+		print("Event on transaction: ${event.type} ${event.property}.${event.bubblingId}=${event.newValue}");
+	});
 
-  account["name"] = "Account1";
+	account["name"] = "Account1";
 
-  account["name"] = "Account2";
+	account["name"] = "Account2";
 
-  operation["account"] = account;
+	operation["account"] = account;
 
-  operations.add(operation);
+	operations.add(operation);
 
-  account["name"] = "Account4";
+	account["name"] = "Account4";
 
-  transaction["operations"] = operations;
+	transaction["operations"] = operations;
 
-  account["name"] = "Account5";
+	account["name"] = "Account5";
 
-  transaction.enableBubbleTargeting();
+	transaction.enableBubbleTargeting();
 
-  account["name"] = "Account6";
+	account["name"] = "Account6";
 
-  operations.add(operation);
+	operations.add(operation);
 
-  operations.removeAt(1);
+	operations.removeAt(1);
 
-  operations.removeAt(0);
+	operations.removeAt(0);
 
-  transaction.disableBubbleTargeting();
+	transaction.disableBubbleTargeting();
 
-  account["name"] = "Account7";
+	account["name"] = "Account7";
 
-  account.disableBubbleTargeting();
+	account.disableBubbleTargeting();
 }

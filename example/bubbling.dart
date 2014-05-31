@@ -16,35 +16,35 @@ class Person extends DartBean {
 	static const REFRESHED_EVENT_TYPE = "refreshed";
 
 	Stream<FLEvent> get onRefreshed => onEvents[REFRESHED_EVENT_TYPE];
-  Stream<PropertyChangedEvent> get onNameChanged => onPropertyChangedEvents[NAME];
+	Stream<PropertyChangedEvent> get onNameChanged => onPropertyChangedEvents[NAME];
 
 	Stream<FLEvent> get onBubbleRefreshed => onBubbleEvents[REFRESHED_EVENT_TYPE];
-  Stream<PropertyChangedEvent> get onBubbleNameChanged => onBubblePropertyChangedEvents[NAME];
+	Stream<PropertyChangedEvent> get onBubbleNameChanged => onBubblePropertyChangedEvents[NAME];
 
 	Person();
 
-  String get name => this[NAME];
+	String get name => this[NAME];
 
-  void set name(String name) {
-    this[NAME] = name;
-  }
+	void set name(String name) {
+		this[NAME] = name;
+	}
 
-  Person get mother => this[MOTHER];
+	Person get mother => this[MOTHER];
 
-  void set mother(Person mother) {
-    this[MOTHER] = mother;
-  }
+	void set mother(Person mother) {
+		this[MOTHER] = mother;
+	}
 
 	void refresh() {
 		dispatch(REFRESHED_EVENT_TYPE);
 	}
 
-  String toString() => "[Person: $name ${mother != null ? "with mother $mother" : "without mother"}]";
+	String toString() => "[Person: $name ${mother != null ? "with mother $mother" : "without mother"}]";
 }
 
 void main() {
-  Person person = new Person();
-  person.enableBubbleTargeting();
+	Person person = new Person();
+	person.enableBubbleTargeting();
 
 	person.onNameChanged.listen((PropertyChangedEvent event) {
 		print("Property change ${event.property} = ${event.newValue} on ${event.target}");
