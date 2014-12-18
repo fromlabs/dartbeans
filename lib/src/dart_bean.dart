@@ -96,9 +96,9 @@ abstract class DartBeanTarget implements FLEventTarget, BubblingTarget, Activabl
 
 	ActionBinder bindActionAndRun(void execute());
 
-	PropertyCalculationBinder bindCalculatedProperty(String targetProperty, calculate());
+	// PropertyCalculationBinder bindCalculatedProperty(String targetProperty, calculate());
 
-	PropertyProxionBinder bindProxiedProperty(source, String sourceProperty, {target, targetProperty});
+	// PropertyProxionBinder bindProxiedProperty(source, String sourceProperty, {target, targetProperty});
 }
 
 class DartBean extends BaseTarget implements DartBeanTarget {
@@ -264,11 +264,11 @@ class DartBean extends BaseTarget implements DartBeanTarget {
 		discriminatedDispatch(PropertyChangedEvent.EVENT_TYPE, property, event);
 	}
 
-	PropertyCalculationBinder bindCalculatedProperty(String targetProperty, PropertyCalculation calculate) => new PropertyCalculationBinder(this, targetProperty, calculate);
+	// PropertyCalculationBinder bindCalculatedProperty(String targetProperty, PropertyCalculation calculate) => new PropertyCalculationBinder(this, targetProperty, calculate);
 
-	PropertyProxionBinder bindProxiedProperty(source, String sourceProperty, {target, targetProperty}) => new PropertyProxionBinder(target != null ? target : this, targetProperty != null ? targetProperty : sourceProperty, source, sourceProperty);
+	// PropertyProxionBinder bindProxiedProperty(source, String sourceProperty, {target, targetProperty}) => new PropertyProxionBinder(target != null ? target : this, targetProperty != null ? targetProperty : sourceProperty, source, sourceProperty);
 }
-
+/*
 class PropertyCalculationBinder extends ActionBinder {
 	final target;
 
@@ -302,3 +302,4 @@ class PropertyProxionBinder extends PropertyCalculationBinder {
 		runNow();
 	}
 }
+*/

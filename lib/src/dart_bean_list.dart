@@ -94,9 +94,9 @@ class DartBeanList<E extends DartBean> extends ListBase<E> implements DartBeanTa
 
 	ActionBinder bindActionAndRun(void execute()) => _delegateeTarget.bindActionAndRun(execute);
 
-	PropertyCalculationBinder bindCalculatedProperty(String targetProperty, calculate()) => _delegateeTarget.bindCalculatedProperty(targetProperty, calculate);
+	// PropertyCalculationBinder bindCalculatedProperty(String targetProperty, calculate()) => _delegateeTarget.bindCalculatedProperty(targetProperty, calculate);
 
-	PropertyProxionBinder bindProxiedProperty(source, String sourceProperty, {target, targetProperty}) => _delegateeTarget.bindProxiedProperty(source, sourceProperty, target: target, targetProperty: targetProperty);
+	// PropertyProxionBinder bindProxiedProperty(source, String sourceProperty, {target, targetProperty}) => _delegateeTarget.bindProxiedProperty(source, sourceProperty, target: target, targetProperty: targetProperty);
 
 	getPropertyValue(String property) => _delegateeTarget.getPropertyValue(property);
 

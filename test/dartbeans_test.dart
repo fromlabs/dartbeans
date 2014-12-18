@@ -57,7 +57,7 @@ void main() {
 			}, throwsStateError);
 		});
 	});
-
+/*
 	group('Simple event stream provider - events:', () {
 		FLEventTarget target = new EventTargetProxy();
 		FLEventStreamProvider provider;
@@ -104,9 +104,9 @@ void main() {
 			bubbleProvider.dispatch(new FLEvent());
 		});
 	});
-
+*/
 	/* Discriminated event stream provider */
-
+/*
 	group('Discriminated event stream provider - management:', () {
 		FLEventTarget target = new EventTargetProxy();
 
@@ -135,7 +135,7 @@ void main() {
 			nameUpdatedProvider.dispatch(new DiscriminatedEvent());
 		});
 	});
-
+*/
 	/* To discriminate event stream provider */
 
 	group('To discriminate event stream provider - management:', () {
@@ -172,7 +172,7 @@ void main() {
 			expect(() => updatedProvider[NAME_DISCRIMINATOR].removeBubbleTargetProvider("provider", bubbleUpdatedProvider), throwsUnsupportedError);
 		});
 	});
-
+/*
 	group('To discriminate event stream provider - events:', () {
 		FLEventTarget target = new EventTargetProxy();
 		ToDiscriminateEventStreamProvider updatedProvider;
@@ -241,9 +241,9 @@ void main() {
 			bubbleUpdatedProvider[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
 		});
 	});
-
+*/
 	/* To route event stream provider */
-
+/*
 	group('To route event stream provider - management:', () {
 		FLEventTarget target = new EventTargetProxy();
 
@@ -340,9 +340,9 @@ void main() {
 			(bubbledProvider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
 		});
 	});
-
+*/
 	/* Stream binders */
-
+/*
 	group('To route event stream provider - events:', () {
 		FLEventTarget target = new EventTargetProxy();
 		ToRouteEventStreamProvider provider;
@@ -364,4 +364,5 @@ void main() {
 			(provider[UPDATED_EVENT_TYPE] as ToDiscriminateEventStreamProvider)[ADDRESS_DISCRIMINATOR].dispatch(new DiscriminatedEvent());
 		});
 	});
+*/
 }

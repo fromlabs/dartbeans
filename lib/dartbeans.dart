@@ -5,7 +5,6 @@
 
 library dartbeans;
 
-import "dart:mirrors";
 import "dart:async";
 import "dart:collection";
 
