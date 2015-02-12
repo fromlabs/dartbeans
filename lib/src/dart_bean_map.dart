@@ -5,7 +5,7 @@
 
 part of dartbeans;
 
-class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantActivationBubbleTarget, EventTargetDelegator {
+class DartBeanMap<K, E> extends MapBase<K, E> implements DartBeanTarget, DependantActivationBubbleTarget, EventTargetDelegator {
 
 	// property names
 	static const LENGTH = "_length";
@@ -28,14 +28,14 @@ class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantAc
 
 	Stream<PropertyChangedEvent> get onBubbleEmptyChanged => onBubblePropertyChangedEvents[EMPTY];
 
-	final List<E> _backingList;
+	final Map<K, E> _backingMap;
 
 	bool _bubbleTargetActivationCascading;
 
 	DartBeanProxy _delegateeTarget;
 
-	DartBeanList({bubbleTargetActivationCascading: false})
-			: _backingList = new List<E>(),
+	DartBeanMap({bubbleTargetActivationCascading: false})
+			: _backingMap = new Map<K, E>(),
 			  _bubbleTargetActivationCascading = bubbleTargetActivationCascading {
 		_delegateeTarget = new DartBeanProxy(this);
 	}
@@ -112,13 +112,13 @@ class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantAc
 		_bubbleTargetActivationCascading = false;
 	}
 
-	bool isBubbleTargetActivationCascading(index) => dependantActivationEnabled;
+	bool isBubbleTargetActivationCascading(K index) => dependantActivationEnabled;
 
-	void addBubbleTargetActivationCascading(index) {
+	void addBubbleTargetActivationCascading(K index) {
 		throw new UnsupportedError("Dependant activation cascading");
 	}
 
-	void removeBubbleTargetActivationCascading(index) {
+	void removeBubbleTargetActivationCascading(K index) {
 		throw new UnsupportedError("Dependant activation cascading");
 	}
 
@@ -128,18 +128,17 @@ class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantAc
 		if (!_delegateeTarget.bubbleTargetingEnabled) {
 			_delegateeTarget.enableBubbleTargeting();
 
-			int index = 0;
-			_backingList.forEach((bubblingTarget) {
+			_backingMap.forEach((index, bubblingTarget) {
 			  if (bubblingTarget is BubblingTarget) {
-          if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(index)) {
-            if (bubblingTarget is DependantActivationBubbleTarget) {
-              bubblingTarget.enableDependantActivation();
-            }
+    				if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(index)) {
+    					if (bubblingTarget is DependantActivationBubbleTarget) {
+    						bubblingTarget.enableDependantActivation();
+    					}
 
-            bubblingTarget.enableBubbleTargeting();
-          }
+    					bubblingTarget.enableBubbleTargeting();
+    				}
 
-          bubblingTarget.addBubbleTarget(index++, this);
+    				bubblingTarget.addBubbleTarget(index, this);
 			  }
 			});
 		} else {
@@ -151,18 +150,18 @@ class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantAc
 		if (_delegateeTarget.bubbleTargetingEnabled) {
 			_delegateeTarget.disableBubbleTargeting();
 
-			int index = _backingList.length;
-			_backingList.reversed.forEach((bubblingTarget) {
+			new List.from(_backingMap.keys).reversed.forEach((index) {
+			  var bubblingTarget = _backingMap[index];
 			  if (bubblingTarget is BubblingTarget) {
-    				bubblingTarget.removeBubbleTarget(--index, this);
+          bubblingTarget.removeBubbleTarget(index, this);
 
-    				if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(index)) {
-    					bubblingTarget.disableBubbleTargeting();
+          if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(index)) {
+            bubblingTarget.disableBubbleTargeting();
 
-    					if (bubblingTarget is DependantActivationBubbleTarget) {
-    						bubblingTarget.disableDependantActivation();
-    					}
-    				}
+            if (bubblingTarget is DependantActivationBubbleTarget) {
+              bubblingTarget.disableDependantActivation();
+            }
+          }
 			  }
 			});
 		} else {
@@ -178,7 +177,7 @@ class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantAc
 		_delegateeTarget.removeBubbleTarget(bubblingId, bubbleTarget);
 	}
 
-	void addPropertyValue(int index, E value, {bool adjustBubblingIds: true}) {
+	void addPropertyValue(K index, E value) {
 		if (this is PropertyHandlingTarget) {
 			(this as PropertyHandlingTarget).onPropertyChangingInternal(index, value, null, true, false);
 			(this as PropertyHandlingTarget).onPropertyChangingInternal(LENGTH, length + 1, length, false, false);
@@ -187,7 +186,7 @@ class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantAc
 			}
 		}
 
-		_backingList.insert(index, value);
+		_backingMap[index] = value;
 
 		if (this is PropertyHandlingTarget) {
 			(this as PropertyHandlingTarget).onPropertyChangedInternal(index, value, null, true, false);
@@ -206,15 +205,11 @@ class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantAc
 
 		if (value is BubblingTarget) {
 			_addBubblingTarget(index, value as BubblingTarget);
-
-			if (adjustBubblingIds) {
-				_adjustBubblingIds(index, 1);
-			}
 		}
 	}
 
-	void updatePropertyValue(int index, E value, {bool forceUpdate: false}) {
-		var previous = _backingList[index];
+	void updatePropertyValue(K index, E value, {bool forceUpdate: false}) {
+		var previous = _backingMap[index];
 
 		if (forceUpdate || value != previous) {
 			if (previous is BubblingTarget) {
@@ -225,7 +220,7 @@ class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantAc
 				(this as PropertyHandlingTarget).onPropertyChangingInternal(index, value, previous, false, false);
 			}
 
-			_backingList[index] = value;
+			_backingMap[index] = value;
 
 			if (this is PropertyHandlingTarget) {
 				(this as PropertyHandlingTarget).onPropertyChangedInternal(index, value, previous, false, false);
@@ -239,15 +234,10 @@ class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantAc
 		}
 	}
 
-	E removePropertyValue(int index, {bool adjustBubblingIds: true}) {
-		var old = _backingList[index];
+	E removePropertyValue(K index) {
+		var old = _backingMap[index];
 		if (old is BubblingTarget) {
 			_removeBubblingTarget(index, old);
-
-			// adjust next bubblingIds
-			if (adjustBubblingIds) {
-				_adjustBubblingIds(index, -1);
-			}
 		}
 
 		if (this is PropertyHandlingTarget) {
@@ -258,7 +248,7 @@ class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantAc
 			}
 		}
 
-		var removed = _backingList.removeAt(index);
+		var removed = _backingMap.remove(index);
 
 		if (this is PropertyHandlingTarget) {
 			(this as PropertyHandlingTarget).onPropertyChangedInternal(index, null, old, false, true);
@@ -278,7 +268,7 @@ class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantAc
 		return removed;
 	}
 
-	void _addBubblingTarget(int index, BubblingTarget bubblingTarget) {
+	void _addBubblingTarget(K index, BubblingTarget bubblingTarget) {
 		if (bubbleTargetingEnabled) {
 			if (bubblingTarget is ActivableBubbleTarget && isBubbleTargetActivationCascading(index)) {
 				if (bubblingTarget is DependantActivationBubbleTarget) {
@@ -292,7 +282,7 @@ class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantAc
 		}
 	}
 
-	void _removeBubblingTarget(int index, BubblingTarget bubblingTarget) {
+	void _removeBubblingTarget(K index, BubblingTarget bubblingTarget) {
 		if (bubbleTargetingEnabled) {
 			bubblingTarget.removeBubbleTarget(index, this);
 
@@ -306,128 +296,51 @@ class DartBeanList<E> extends ListBase<E> implements DartBeanTarget, DependantAc
 		}
 	}
 
-	int get length => _backingList.length;
+	/* from Map */
 
-	E operator [](int index) => _backingList[index];
+  bool containsValue(Object value) => _backingMap.containsValue(value);
 
-	/* from List */
+  bool containsKey(Object key) => _backingMap.containsKey(key);
 
-	void add(E element) {
-		addPropertyValue(this.length, element);
-	}
+  E operator [](Object key) => _backingMap[key];
 
-	void addAll(Iterable<E> iterable) {
-		iterable.forEach((e) {
-			addPropertyValue(this.length, e);
-		});
-	}
+  void operator []=(K key, E value) {
+    updatePropertyValue(key, value);
+  }
 
-	void insert(int index, E element) {
-		addPropertyValue(index, element);
-	}
+  E putIfAbsent(K key, E ifAbsent()) {
+    if (!this.containsKey(key)) {
+      this[key] = ifAbsent();
+    }
+    return this[key];
+  }
 
-	void insertAll(int index, Iterable<E> iterable) {
-		iterable.forEach((e) {
-			addPropertyValue(index++, e);
-		});
-	}
+  void addAll(Map<K, E> other) {
+    other.forEach((k, e) {
+      this[k] = e;
+    });
+  }
 
-	void operator []=(int index, E value) {
-		updatePropertyValue(index, value);
-	}
+  E remove(Object key) => removePropertyValue(key);
 
-	void setAll(int index, Iterable<E> iterable) {
-		iterable.forEach((e) {
-			this[index++] = e;
-		});
-	}
+  void clear() {
+    var reversed = new List.from(this.keys).reversed;
+    reversed.forEach((k) => remove(k));
+  }
 
-	void set length(int newLength) {
-		if (newLength < _backingList.length) {
-			// remove
-			removeRange(newLength, _backingList.length);
-		} else if (newLength > _backingList.length) {
-			// add
-			for (var i = _backingList.length; i < newLength; i++) {
-				add(null);
-			}
-		}
-	}
+  void forEach(void f(K key, E value)) {
+    _backingMap.forEach(f);
+  }
 
-	bool remove(Object value) {
-		var i = indexOf(value);
+  Iterable<K> get keys => _backingMap.keys;
 
-		if (i != -1) {
-			this.removeAt(i);
-		}
+  Iterable<E> get values => _backingMap.values;
 
-		return i != -1;
-	}
+  int get length => _backingMap.length;
 
-	E removeAt(int index) {
-		return removePropertyValue(index);
-	}
+  bool get isEmpty => _backingMap.isEmpty;
 
-	E removeLast() {
-		return removeAt(length - 1);
-	}
-
-	void removeRange(int start, int end) {
-		for (var i = end; i >= start; i--) {
-			removePropertyValue(i);
-		}
-	}
-
-	void clear() {
-		while (!isEmpty) {
-			removePropertyValue(length - 1);
-		}
-	}
-
-	void removeWhere(bool test(E element)) {
-		_throwTodoError();
-	}
-
-	void retainWhere(bool test(E element)) {
-		_throwTodoError();
-	}
-
-	void setRange(int start, int end, Iterable<E> iterable, [int skipCount = 0]) {
-		_throwTodoError();
-	}
-
-	void fillRange(int start, int end, [E fillValue]) {
-		_throwTodoError();
-	}
-
-	void replaceRange(int start, int end, Iterable<E> iterable) {
-		_throwTodoError();
-	}
-
-	void _adjustBubblingIds(int fromIndex, int delta) {
-		if (bubbleTargetingEnabled) {
-			var i = fromIndex;
-			if (delta > 0) {
-				_backingList.sublist(fromIndex + delta).forEach((nextElement) {
-					if (nextElement is BubblingTarget) {
-						nextElement.removeBubbleTarget(i, this);
-						nextElement.addBubbleTarget(i + delta, this);
-					}
-
-					i++;
-				});
-			} else {
-				_backingList.sublist(fromIndex - delta).forEach((nextElement) {
-					if (nextElement is BubblingTarget) {
-						nextElement.removeBubbleTarget(i - delta, this);
-						nextElement.addBubbleTarget(i, this);
-					}
-
-					i++;
-				});
-			}
-		}
-	}
+  bool get isNotEmpty => _backingMap.isNotEmpty;
 
 	void _throwTodoError() {
 		throw new UnimplementedError("TODO");

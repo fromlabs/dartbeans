@@ -14,3 +14,4 @@ part "src/stream_provider.dart";
 part "src/stream_binder.dart";
 part "src/dart_bean.dart";
 part "src/dart_bean_list.dart";
+part "src/dart_bean_map.dart";

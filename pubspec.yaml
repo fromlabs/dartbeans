@@ -1,5 +1,5 @@
 name: dartbeans
-version: 0.4.0
+version: 0.5.0
 author: Roberto Tassi <roberto.tassi@fromlabs.org>
 description: A Dart library that helps working with beans and event streams.
 homepage: https://github.com/fromlabs/dartbeans
